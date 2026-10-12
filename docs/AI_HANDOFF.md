@@ -1,14 +1,14 @@
 # AI 接手：TV
 
-更新日期：2026-10-12。应用实现检查点：`f8bb716` / `0.2.1-dev`（versionCode 3）。这是一份交接快照，后续修改以当前代码、任务评论与 Git 记录为准。
+更新日期：2026-10-12。应用实现检查点：`0.2.2-dev`（versionCode 4，P4 普通搜索切片；对应提交见 Git 记录）。这是一份交接快照，后续修改以当前代码、任务评论与 Git 记录为准。
 
 ## 开始工作
 
 1. 先读根目录 [AGENTS.md](../AGENTS.md)，再读[现代化方案](../.scratch/tv-modernization/spec.md)、[P4 当前任务](../.scratch/tv-modernization/issues/04-compose-vod-pages.md)和[执行记录](MODERNIZATION.md)。完成条件：能区分已运行代码、部分实现与后续计划。
 2. 检查 `git status --short --branch`、`git remote -v` 和已有工具；根据[环境记录](ENVIRONMENT.md)复用环境。完成条件：确认当前分支、用户修改、工具路径及服务状态，再开始改动。
-3. 用户要求继续开发时，从 P4 的搜索迁移接着做；按下方入口核对现有行为，再完成一个有构建、必要测试与本地提交的切片。完成条件：更新对应任务与执行记录，说明剩余项及环境清理结果。
+3. 用户要求继续开发时，从 P4 的快速搜索状态迁移接着做；普通搜索状态切片已通过，先读[两页行为差异](../.scratch/tv-modernization/baseline/search.md)，按下方入口核对现有行为，再完成一个有构建、必要测试与本地提交的切片。完成条件：更新对应任务与执行记录，说明剩余项及环境清理结果。
 
-用户已授权按现代化方案执行，无需重新询问路线或重新做需求访谈；新对话的最新指令决定当前动作。本次交接只整理并推送仓库，没有继续修改产品功能。
+用户已授权按现代化方案执行，无需重新询问路线或重新做需求访谈；新对话的最新指令决定当前动作。最近切片完成普通搜索的状态与请求迁移，仅本地提交；此前 GitHub 整理推送的授权不扩大到后续远程写入。
 
 ## 当前进度
 
@@ -17,7 +17,7 @@
 | P1 构建链与基线 | 已通过双 ABI 构建、原源引擎固定样本和基线检查 |
 | P2 状态与接口 | 已通过；SourceAccess / LibraryStore / SettingsStore 包住原后端 |
 | P3 首页 | 顶部导航与推荐区 Compose 核心完成；分类 / 继续观看列表为原生 TV View；完整状态矩阵、性能验收待完成 |
-| P4 点播页面 | 历史 / 收藏 Kotlin 状态、详情信息 Compose 与收藏状态已完成切片；搜索、详情完整业务协调、重建与错误 / 空态矩阵待做 |
+| P4 点播页面 | 历史 / 收藏 Kotlin 状态、详情信息 Compose 与收藏状态、普通搜索 Kotlin 状态已完成切片；快速搜索、词表请求生命周期、详情完整协调、进程死亡 / 完整重建与错误 / 空态矩阵待做 |
 | P5–P9 | 设置 / 直播接入、播放服务、Media3、内部收敛、最终验收尚未开始；不要据现有同名 Java 类判断已实现新架构 |
 
 P3 尚有收尾项，但 P4 已获授权并在执行；本地任务的 `Blocked by: 03` 是阶段关系，不撤销已记录的执行授权。任务状态仍使用现有分诊标签，不创建另一套进度系统。
@@ -41,16 +41,18 @@ P3 尚有收尾项，但 P4 已获授权并在执行；本地任务的 `Blocked 
 | 统一接口 | `modern/data/SourceAccess.kt`、`LegacySourceAccess.kt`、`LibraryStore.kt`、`SettingsStore.kt`；不可变模型在 `modern/model/Content.kt` |
 | 历史 / 收藏 | `ui/activity/LibraryActivity.kt`、`modern/library/LibraryViewModel.kt`、`LegacyLibraryView.kt`；Room 是唯一存储后端，原生列表宿主保留 |
 | 详情 | `ui/activity/DetailActivity.java` 仍拥有请求 / fallback / 选集和原生播放宿主；`modern/detail/DetailViewModel.kt` 仅管理已接受的信息快照和收藏；`ui/compose/TvDetailInfoView.kt` 显示信息 |
-| 搜索（下一步） | `ui/activity/SearchActivity.java`、`FastSearchActivity.java`、`ui/tv/widget/SearchKeyboard.java`；行为迁移前完整阅读相关方法和原布局 |
+| 普通搜索 | `modern/search/SearchViewModel.kt` 持有调度 / 匹配 / 目录 / 候补；`ui/activity/SearchActivity.java` 保留原输入 / 词表 / TV 列表宿主；`SourceAccess.folder` 委派原 getList |
+| 快速搜索（下一步） | `ui/activity/FastSearchActivity.java` 的分词 / 按源筛选 / 调度仍是原实现；`ui/tv/widget/SearchKeyboard.java` 保留不动；行为迁移前完整阅读相关方法和原布局 |
 | 源与播放 | `viewmodel/SourceViewModel.java`、`api/ApiConfig.java`、`ui/fragment/PlayFragment.java`、`player/`；契约包名 / 类名 / 字段 / 反射签名保留 |
 
 表中 app 代码路径均位于 `app/src/main/java/com/github/tvbox/osc/`。应用 ID 与源码 namespace 不同是为动态源契约兼容保留的选择。
 
-搜索切片先核对：指定来源与首页来源优先级、精确 / 前缀匹配及结果阈值、并发与超时、取消 / 暂停 / 恢复、打开详情后返回、folder / action 结果与目录返回、远程输入、热词 / 搜索历史、普通与快速搜索差异。保持左侧原 SearchKeyboard 和原生 TV 结果列表；这些行为通过后再移除已被替代的旧入口。
+普通搜索已经核对并迁移指定来源 / 首页优先、精确 / 前缀匹配与阈值、并发 / 超时、暂停 / 恢复、详情候补和目录栈；保留左侧原 SearchKeyboard、词表和原生 TV 结果列表。配置重建不重复搜索，目录 / 详情返回通过原列表恢复结果焦点。快速搜索还有按空白分词匹配、按源筛选、2 秒 pump 与状态栏等差异，不直接套用普通搜索匹配规则。词表请求、进程死亡和完整错误矩阵尚未迁移 / 验收；替代通过后才移除旧入口。
 
 ## 已遇到的问题
 
 - 原 `SourceViewModel.getSearch` 通过 EventBus 返回结果，不向公开的 `searchResult` LiveData 发布。`LegacySourceAccess` 已按 sourceKey + UUID token 订阅并注销；继续复用该桥接和并发搜索回归测试。
+- 普通搜索接入后，adapter 搜索使用独立有界 worker，避免占住旧 spThreadPool；HTTP 搜索使用 `getSearchForRequest` 的独立 UUID tag。取消只作用于该请求，不能退回全局 `cancelTag("search")` / `JsLoader.stopAll()`。第三方阻塞调用可能忽略中断，继续占用有界 worker；JS 内部 HTTP 共用 tag 的进一步收口待 P8。
 - `push_agent` 是可用的虚拟来源，不进入配置来源列表；可用性用 `SourceAccess.supports` 判断。历史 / 收藏身份是 sourceKey + vodId，不能只按 ID 去重或删除。
 - 整页 AndroidView 包装原生历史列表曾让焦点落在 Compose 宿主，已回退为原生列表宿主；这个取舍已经过设备对照。详情收藏保存期间禁用按钮也会丢焦点，当前由 ViewModel 忽略重复确认并保留按钮可用状态。
 - `TvControls` 使用原生字体度量匹配旧 TextView；三行简介还使用 fallback 行距。替换这些实现前对照浅 / 深色、720p / 1080p；原 ImgUtil 的字母占位图颜色每个进程会随机变化。
@@ -59,9 +61,10 @@ P3 尚有收尾项，但 P4 已获授权并在执行；本地任务的 `Blocked 
 
 检查点已通过：Python32 / Python64 Debug、包名 / API 28 / 精确 ABI / QuickJS / Python、APK v2 签名，以及无预置源、无用户测试订阅、无测试视频 / 图片。
 
-- 单元测试 23 项：首页 9、历史 / 收藏 8、详情 6。
-- ARM64 API 33 Android TV 设备测试 8 项：动态 JAR / JS / Python 3、原源接口 2、顶部导航 1、固定源详情收藏 / 预览与全屏 / 暂停恢复 1、列表删除 / 清空 1。
+- 单元测试 34 项：首页 9、历史 / 收藏 8、详情 6、普通搜索 11。
+- ARM64 API 33 Android TV 最终设备测试 11 项：动态 JAR / JS / Python 3、原源接口与搜索 worker 3、顶部导航 1、固定源详情收藏 / 预览与全屏 / 暂停恢复 1、列表删除 / 清空 1、普通搜索 / 快速搜索路由 2。
 - 详情旧版 / 候选的 720p / 1080p、浅 / 深色四组对照通过；排除视频和时钟，信息区以外像素一致，信息区存在字体栅格差异。
+- 搜索旧版 / 候选的 720p / 1080p、浅 / 深色、文字 / 海报共八组对照通过；普通与快速结果页 16 对截图像素一致，目录页差异仅局部焦点恢复后的原生高亮。搜索设备测试验证原键盘确认 / 删除、远程输入、action / tag 字段、目录 / 详情返回、配置重建不重复搜索和快速搜索路由。普通搜索仍是原生 UI 宿主；不宣称完整 Compose 页面已完成。
 
 单测和设备测试源码在 `app/src/test`、`app/src/androidTest`；固定源、视频和图片为自有测试样本，只进入测试 APK。测试会写数据和切换配置，应使用独立测试设备；清空用例要求测试设备收藏为空。设备界面测试必须串行执行。
 
@@ -85,11 +88,11 @@ python3 scripts/check-device.py --serial emulator-5554 --port 5039
 python3 scripts/verify-apk.py app/build/outputs/apk/python32/debug/TV_debug-python32.apk --abi armeabi-v7a
 ```
 
-本机 APK：`artifacts/TV-0.2.1-dev-armv7-debug.apk`、`artifacts/TV-0.2.1-dev-arm64-debug.apk`。证据目录：`artifacts/modernization/p4-checkpoint-tests`、`p4-detail-matrix`；原 0.1.0 / P1 / P3 包仍保留。源码内有[原生基线](../.scratch/tv-modernization/baseline/README.md)和 [HTML 设计档案](../.scratch/design/README.md)。
+本机当前 APK：`artifacts/TV-0.2.2-dev-armv7-debug.apk`、`artifacts/TV-0.2.2-dev-arm64-debug.apk`。搜索证据：`artifacts/modernization/p4-search`、`p4-search-final-tests`、`p4-search-matrix`；此前 `p4-checkpoint-tests`、`p4-detail-matrix` 与原 0.1.0 / P1 / P3 / 0.2.1 包仍保留。源码内有[原生基线](../.scratch/tv-modernization/baseline/README.md)和 [HTML 设计档案](../.scratch/design/README.md)。
 
 `artifacts/`、`.local-test/`、`local.properties`、本机 Debug 密钥、SDK / AVD 不入 Git。用户测试地址仅在本机 `.local-test/subscription-url.txt` 或设备数据；不在交接文档中复制。新机器 clone 不会得到本地 APK、候选报告或工具环境，需按源码重建，不能把本机证据路径当作仓库附件。
 
-交接时无本项目运行中的服务，临时 AVD / adb、Swift 缓存及构建中间产物已清理。长期 `${HOME}/.local/share/tv-android/` 约 13 GiB，保留 JDK / SDK / 匹配 Python / Gradle 依赖及 `TV_1080p_API33`；本机 APK 与报告约 835 MiB。Rosetta 的系统共享 oahd 保留，不清理其他项目共用工具。
+交接时无本项目运行中的服务，临时 TV_P4_Search_Test / adb、一次性脚本及构建中间产物已清理。长期 `${HOME}/.local/share/tv-android/` 约 13 GiB，保留 JDK / SDK / 匹配 Python / Gradle 依赖及 `TV_1080p_API33`，该长期设备数据未改；本机 APK 与报告约 1.0 GiB。Rosetta 与 Codex bundled Python 等共享工具保留不动。本切片没有安装工具或新增自动启动项。
 
 ## Git 与授权
 
@@ -97,4 +100,4 @@ python3 scripts/verify-apk.py app/build/outputs/apk/python32/debug/TV_debug-pyth
 
 保留上游 Git 历史、许可证与[来源记录](UPSTREAM.md)。项目提交依次为：`a2f5494` 首包、`d1cf993` 模拟器、`854ce3b` 方案、`922e381` P1、`59bb28d` P2、`01bc5cc` P3、`194dd9d` 历史 / 收藏、`f8bb716` 详情切片；交接整理提交可用 `git log` 查询。
 
-本次用户明确授权整理并推送 tardlk/TV。日常执行使用 Debug 构建和本地提交，后续远程写入按当次用户授权处理。Release 构建、GitHub Release、APK 上传、自动发布及对其他仓库的写入没有随此次源码推送获得授权。
+此前用户明确授权整理并推送 tardlk/TV。本次普通搜索按方案执行 Debug 构建和本地提交，没有推送；后续远程写入按当次用户授权处理。Release 构建、GitHub Release、APK 上传、自动发布及对其他仓库的写入没有随此前源码推送获得授权。

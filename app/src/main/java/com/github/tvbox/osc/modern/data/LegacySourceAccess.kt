@@ -15,6 +15,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import java.util.UUID
+import android.os.Build
+import com.lzy.okgo.OkGo
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 class LegacySourceAccess : SourceAccess {
     override fun supports(sourceKey: String) = ApiConfig.get().getSource(sourceKey) != null
@@ -41,8 +46,17 @@ class LegacySourceAccess : SourceAccess {
             EventBus.getDefault().register(observer)
             val unsubscribe = { EventBus.getDefault().unregister(observer) }
             unsubscribe
-        }) { source.getSearch(sourceKey, query, token) }
+        }, searchRequest = true, requestTag = token,
+            blocking = ApiConfig.get().getSource(sourceKey)?.type == 3) {
+            source.getSearchForRequest(sourceKey, query, token, token)
+        }
         return result.movie?.videoList.orEmpty().map { it.toContent(sourceKey) }
+    }
+
+    override suspend fun folder(ref: ContentRef): List<ContentItem> {
+        val source = SourceViewModel()
+        val result = awaitResult(source.listResult) { source.getList(ref.sourceKey, ref.id) }
+        return result.movie?.videoList.orEmpty().map { it.toContent(ref.sourceKey) }
     }
 
     override suspend fun details(ref: ContentRef): ContentDetails {
@@ -68,25 +82,38 @@ class LegacySourceAccess : SourceAccess {
         result.observeForever(observer)
         val unsubscribe = { result.removeObserver(observer) }
         unsubscribe
-    }, request)
+    }, request = request)
 
-    private suspend fun <T : Any> awaitSignal(subscribe: (CompletableDeferred<T>) -> (() -> Unit), request: () -> Unit): T = withContext(Dispatchers.Main.immediate) {
+    private suspend fun <T : Any> awaitSignal(
+        subscribe: (CompletableDeferred<T>) -> (() -> Unit),
+        searchRequest: Boolean = false, requestTag: String? = null, blocking: Boolean = true,
+        request: () -> Unit,
+    ): T = withContext(Dispatchers.Main.immediate) {
         val completion = CompletableDeferred<T>()
         val unsubscribe = subscribe(completion)
-        val worker = SourceViewModel.spThreadPool.submit {
-            try {
-                request()
-            } catch (failure: Throwable) {
-                completion.completeExceptionally(SourceUnavailable(failure))
-            }
-        }
+        var worker: java.util.concurrent.Future<*>? = null
         try {
+            val invoke = Runnable {
+                try { request() }
+                catch (failure: Throwable) { completion.completeExceptionally(SourceUnavailable(failure)) }
+            }
+            if (!blocking) invoke.run()
+            else worker = (if (searchRequest) searchWorkers else SourceViewModel.spThreadPool).submit(invoke)
             withTimeout(35_000) { completion.await() }
         } finally {
             unsubscribe()
-            worker.cancel(true)
+            worker?.cancel(true)
+            if (requestTag != null) OkGo.getInstance().cancelTag(requestTag)
             completion.cancel()
         }
+    }
+
+    companion object {
+        // Never queue a cancelled spider behind the single legacy playback/catalog worker.
+        // A spider ignoring interruption still occupies one bounded worker until it returns.
+        private val searchWorkers = ThreadPoolExecutor(0,
+            if (Build.VERSION.SDK_INT >= 35) 24 else if (Build.VERSION.SDK_INT >= 30) 18 else 12,
+            30L, TimeUnit.SECONDS, SynchronousQueue())
     }
 }
 

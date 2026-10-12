@@ -908,6 +908,11 @@ public class SourceViewModel extends ViewModel {
         getSearch(sourceKey, wd, searchToken, searchResult, "search");
     }
 
+    // Isolated request ownership for the modern search adapter; legacy callers keep their tags.
+    public void getSearchForRequest(String sourceKey, String wd, String searchToken, String requestTag) {
+        getSearch(sourceKey, wd, searchToken, searchResult, requestTag);
+    }
+
     public void getDetailFallbackSearch(String sourceKey, String wd, String searchToken) {
         getSearch(sourceKey, wd, searchToken, detailFallbackSearchResult, "detail_fallback_search");
     }

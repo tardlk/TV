@@ -12,6 +12,9 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Test
@@ -20,6 +23,62 @@ import org.junit.Assert.*
 
 @RunWith(AndroidJUnit4::class)
 class SourceAccessIntegrationTest {
+    @Test fun boundedSpiderSearchKeepsCatalogAndOtherEnginesResponsive() = runBlocking {
+        val apiWasPresent = Hawk.contains(HawkConfig.API_URL)
+        val oldApi = Hawk.get(HawkConfig.API_URL, "")
+        val homeWasPresent = Hawk.contains(HawkConfig.HOME_API)
+        val oldHome = Hawk.get(HawkConfig.HOME_API, "")
+        val assets = InstrumentationRegistry.getInstrumentation().context.assets
+        var base = ""
+        val server = object : NanoHTTPD("127.0.0.1", 0) {
+            override fun serve(session: IHTTPSession): Response {
+                if (session.uri != "/config.json" && session.uri != "/api")
+                    return newChunkedResponse(Response.Status.OK, "text/plain", assets.open(session.uri.drop(1)))
+                val body = if (session.uri == "/config.json") JSONObject().put("spider", "")
+                    .put("sites", JSONArray()
+                        .put(JSONObject().put("key", "worker-jar").put("name", "JAR").put("type", 3)
+                            .put("api", "csp_Smoke").put("jar", base + "engine-smoke.jar"))
+                        .put(JSONObject().put("key", "worker-js").put("name", "JS").put("type", 3).put("api", base + "engine-smoke.js"))
+                        .put(JSONObject().put("key", "worker-python").put("name", "Python").put("type", 3).put("api", base + "engine_smoke.py"))
+                        .put(JSONObject().put("key", "worker-http").put("name", "HTTP").put("type", 1).put("api", base + "api")))
+                    .put("lives", JSONArray()).put("parses", JSONArray())
+                else JSONObject().put("list", JSONArray().put(JSONObject().put("vod_id", "http").put("vod_name", "HTTP")))
+                return newFixedLengthResponse(Response.Status.OK, "application/json", body.toString())
+            }
+        }
+        server.start(); base = "http://127.0.0.1:${server.listeningPort}/"
+        try {
+            Hawk.put(HawkConfig.API_URL, base + "config.json")
+            val loaded = CompletableDeferred<Unit>()
+            InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                ApiConfig.get().loadConfig(false, object : ApiConfig.LoadConfigCallback {
+                    override fun success() { loaded.complete(Unit) }
+                    override fun notice(message: String) = Unit
+                    override fun error(message: String) { loaded.completeExceptionally(AssertionError(message)) }
+                }, null)
+            }
+            withTimeout(10_000) { loaded.await() }
+            // Warm loading independently of the scheduling measurement.
+            withContext(Dispatchers.IO) {
+                listOf("worker-jar", "worker-js", "worker-python").forEach { ApiConfig.get().getCSP(ApiConfig.get().getSource(it)) }
+            }
+            val source = LegacySourceAccess()
+            val slow = async { source.search("worker-jar", "Slow") }
+            withTimeout(3_000) { while (System.getProperty("tv.fixture.search.started") != "true") delay(10) }
+            withTimeout(1_500) {
+                assertEquals("HTTP", source.catalog("worker-http").recommendations.single().title)
+                assertEquals("Quick", source.search("worker-jar", "Quick").single().title)
+                assertEquals("JS", source.search("worker-js", "JS").single().title)
+                assertEquals("Python", source.search("worker-python", "Python").single().title)
+            }
+            assertEquals("Slow", slow.await().single().title)
+        } finally {
+            server.stop(); System.clearProperty("tv.fixture.search.started")
+            if (apiWasPresent) Hawk.put(HawkConfig.API_URL, oldApi) else Hawk.delete(HawkConfig.API_URL)
+            if (homeWasPresent) Hawk.put(HawkConfig.HOME_API, oldHome) else Hawk.delete(HawkConfig.HOME_API)
+        }
+    }
+
     @Test fun adapterUsesOriginalConfigAndSourceRequestPipeline() = runBlocking {
         val apiWasPresent = Hawk.contains(HawkConfig.API_URL)
         val oldApi = Hawk.get(HawkConfig.API_URL, "")
@@ -66,6 +125,10 @@ class SourceAccessIntegrationTest {
             stage = "search"
             val results = withTimeout(3_000) { source.search("modern-fixture", "Adapter") }
             assertEquals("fixture-id", results.single().ref.id)
+            stage = "folder"
+            val folder = withTimeout(3_000) { source.folder(ContentRef("modern-fixture", "fixture-folder")) }
+            assertEquals("fixture-id", folder.single().ref.id)
+            assertTrue(requests.any { it.contains("t=fixture-folder") })
             stage = "concurrent-search"
             val first = async { source.search("modern-fixture", "Adapter") }
             val second = async { source.search("modern-fixture", "Other") }

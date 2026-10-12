@@ -7,6 +7,7 @@ interface SourceAccess {
     fun supports(sourceKey: String): Boolean = selection().sources.any { it.key == sourceKey }
     suspend fun catalog(sourceKey: String): SourceCatalog
     suspend fun search(sourceKey: String, query: String): List<ContentItem>
+    suspend fun folder(ref: ContentRef): List<ContentItem> = throw SourceUnavailable()
     suspend fun details(ref: ContentRef): ContentDetails
     suspend fun resolve(ref: ContentRef, flag: String, url: String, progressKey: String, subtitleKey: String): ResolvedPlayback
 }

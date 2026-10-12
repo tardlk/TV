@@ -10,4 +10,12 @@ public final class Smoke extends Spider {
     @Override public String playerContent(String flag, String id, List<String> vipFlags) {
         return "{\"parse\":0,\"url\":\"jar-fixture\",\"site\":\"" + siteKey + "\"}";
     }
+    @Override public String searchContent(String key, boolean quick) {
+        if ("Slow".equals(key)) {
+            System.setProperty("tv.fixture.search.started", "true");
+            try { Thread.sleep(2000); }
+            catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); }
+        }
+        return "{\"list\":[{\"vod_id\":\"jar\",\"vod_name\":\"" + key + "\"}]}";
+    }
 }

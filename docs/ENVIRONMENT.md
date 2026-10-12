@@ -87,3 +87,11 @@ platform-tools 37.0.1 的 adb server 在本机 macOS 出现 libunwind invalid co
 用户授权将源码和文档推送至 tardlk/TV 的 main。复用已有 Git / GitHub CLI，没有安装工具、启动测试服务或改动长期 AVD。补齐本仓库部分克隆缺失的上游历史对象以保留完整提交历史；本地 .git 从约 31 MiB 增至约 75 MiB，属于源码历史，长期保留。origin 指向用户仓库，upstream 保留只读来源。
 
 当前树移除未使用的上游签名文件，后续本机签名材料由 .gitignore 排除；原上游历史、许可证和工作流参考保留。APK、测试地址、机器配置与工具环境仍留在 ignored 本地目录。本次整理不改变应用实现及既有测试结论，验证文档指针、版本库完整性和远程内容，不重建已清理的 Android 构建环境。
+
+## P4 普通搜索切片（2026-10-12，最新留存）
+
+复用全部既有 JDK / SDK / Python / Gradle，没有安装新工具或设置自动启动项。像素比较使用 Codex 已提供的 bundled Python / Pillow / NumPy，是共享运行时，不复制或删除其环境。创建临时 AVD TV_P4_Search_Test 执行旧版与候选对照，长期 TV_1080p_API33 的数据未改。
+
+任务结束已停止临时 emulator 和专用 adb 5039，以及该 emulator 自动拉起的 adb 5037；两个端口无监听，未发现项目 Gradle / Kotlin daemon。删除临时 AVD、各模块 build / 工程 .gradle、生成的测试 JAR、一次性矩阵脚本与诊断暂存。测试内 HTTP 服务在 finally 停止，没有本项目仍运行的服务。
+
+长期 `${HOME}/.local/share/tv-android/` 仍约 13 GiB，构成和用途沿用前表；Gradle 依赖缓存约 2.2 GiB，长期 TV AVD 约 998 MiB。保留的 `artifacts/` 约 1.0 GiB，新增 0.2.2-dev 双 ABI Debug / 测试 APK、单测 / 设备报告与搜索视觉矩阵，供审阅、回退和继续验证；`.local-test/` 约 64 KiB，保留原测试地址与最终构建 / 矩阵日志。Rosetta 的系统共享 oahd 保留，不改变其他项目工具或服务。

@@ -94,3 +94,22 @@ P2 初始接口与状态、P3 首页核心功能已通过，P4 点播页面接�
 - 交付 artifacts/TV-0.2.1-dev-armv7-debug.apk、TV-0.2.1-dev-arm64-debug.apk（versionCode 3），包名 / Android 9 下限 / 精确 ABI / QuickJS / Python / 无预置源 / 无测试订阅 / 无测试视频与图片检查通过，APK v2 签名验证通过。原 0.1.0 / P3 包仍保留。
 
 测试图片与视频仅在 AndroidTest assets。暂时没有 ARMv7 真机；性能、完整生命周期、外部线路和直播仍按原任务跟踪，不能把本切片当作九阶段已经全部完成。
+
+## P4：普通搜索状态与请求切片（0.2.2-dev）
+
+普通搜索由 SearchViewModel / StateFlow 持有搜索范围快照、调度、精确 / 前缀匹配、目录栈、暂停恢复、选中索引与详情候补；SourceAccess.folder 委派原 getList。SearchActivity 继续拥有原 XML、左侧 SearchKeyboard、词表、搜索历史 / 指定源和原生 TV 列表，只收集状态与执行导航。已替代的线程池、计时器和搜索结果 EventBus 入口移除。FastSearchActivity 的分词 / 按源筛选和原调度保持，默认搜索模式保持。两页行为差异和边界见 [搜索基线](../.scratch/tv-modernization/baseline/search.md)。
+
+搜索桥的阻塞调用使用独立有界 worker（API 28 / 30 / 35 分别 12 / 18 / 24），避免占住原共用单线程目录 / 详情 / 播放队列。原 HTTP 搜索通过新增的 getSearchForRequest 入口使用 UUID tag，其余源协议和旧调用签名保持；取消注销该请求的事件监听并中断 worker / 取消该 HTTP tag，不再取消全局搜索或所有 JS 请求。第三方调用可能忽略中断并继续占用有界 worker；代次拒绝晚到结果，不能把 Job 取消描述为源调用已停止。JS 内部 HTTP 共用 tag 的完整收口待 P8。
+
+目录与详情返回使用原 TvRecyclerView 的 selection 和 itemView.requestFocus 恢复原结果位置，不扩展焦点框架。原版设备对照确认目录返回落到左侧按钮；候选保留页面几何和原生焦点样式，增加局部返回恢复。Activity 配置重建保留 ViewModel 的结果和查询，不重发已完成搜索；进程死亡恢复尚未验证。
+
+### 验证与交付
+
+- Python32 / Python64 Debug 和 AndroidTest 构建通过；34 项单元测试（首页 9、历史 / 收藏 8、详情 6、普通搜索 11）全部通过。搜索覆盖范围 / 首页优先、空选择、HTTP 立即启动、六个初始 spider / 3 秒推进 / 有界并发、阈值、候补身份、异常 / 超时、暂停恢复、晚到请求拒绝和目录返回。
+- 最终 0.2.2-dev 在临时 API 33 ARM64 TV 上串行执行六组、11 项设备测试通过：源引擎 3、源桥接 3、首页导航 1、原详情 / 播放 1、列表删除 / 清空 1、搜索 2。新增桥接测试在慢 JAR 调用期间验证 HTTP 目录与另一项 JAR / JS / Python 搜索返回；目录走真实原 getList 参数。搜索测试覆盖原键盘确认 / 删除、远程输入、action / tag 字段、目录加载 / 返回、详情入口 / 返回、配置重建不重复搜索、快速搜索路由。原预览 / 全屏和媒体键暂停恢复回归通过。
+- 旧 0.2.1-dev 与候选在 720p / 1080p、浅 / 深色、文字 / 海报共八组运行相同固定源测试；普通结果页和快速结果页共 16 对截图像素一致。八对目录页约 1.22%–1.38% 像素差异均由原生焦点高亮位置变化造成，检查并排图确认没有布局 / 字体 / 图片变化。矩阵包含 32 次设备测试执行，作为对照证据，不与最终 11 项回归重复累计。
+- 交付 `artifacts/TV-0.2.2-dev-armv7-debug.apk` 与 `TV-0.2.2-dev-arm64-debug.apk`（versionCode 4）。包身份 / API 28 / 精确 ABI / QuickJS / Python / 无预置源 / 无用户测试订阅 / 无测试视频与图片 / APK v2 签名检查通过；原包全部保留。报告、测试 APK 与单测在 `artifacts/modernization/p4-search`，最终设备报告在 `p4-search-final-tests`，对照截图 / JSON 在 `p4-search-matrix`，均为 ignored 本地证据。
+
+这是一组普通搜索状态与请求迁移，原生 UI 宿主保留；不是快速搜索或整个 P4 完成。快速搜索状态、词表请求生命周期、详情完整协调、进程死亡与完整错误 / 空态矩阵继续待做。ARMv7 真机、外部线路、直播、音频和既有性能问题未在本轮获得新结论。
+
+未安装工具或新增自动启动项；复用专用构建环境与 Codex 已有 Pillow / NumPy 作像素比较。临时 TV_P4_Search_Test、本任务启动的 adb 5039 / 5037、构建中间产物和一次性脚本已停止 / 清理，长期 TV_1080p_API33 数据未改。最新空间记录见 ENVIRONMENT.md。

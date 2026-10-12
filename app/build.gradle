@@ -17,8 +17,8 @@ android {
     defaultConfig {
         applicationId 'com.coke.tv'
         targetSdkVersion 28
-        versionCode 3
-        versionName '0.2.1-dev'
+        versionCode 4
+        versionName '0.2.2-dev'
         multiDexEnabled true
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         //设置room的Schema的位置
