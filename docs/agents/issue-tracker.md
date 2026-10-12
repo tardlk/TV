@@ -1,6 +1,6 @@
 # Issue tracker：本地 Markdown
 
-本仓库的任务和规格存放在 `.scratch/`。GitHub remote 仅表明源码上游，不是本项目的任务跟踪入口。
+本仓库的任务和规格存放在 `.scratch/`。GitHub `origin` 是用户源码仓库，`upstream` 是只读来源；任务仍以本地 Markdown 为入口。
 
 ## 文件约定
 

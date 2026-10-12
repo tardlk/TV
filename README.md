@@ -2,6 +2,8 @@
 
 独立 Android TV 应用，以 TVBoxOS 为功能基线，继承 AVBox 的视觉风格。逐步迁移至 Kotlin / Compose，复用原源引擎、播放器和遥控器控制链。设计采用顶部导航 C；Android 9+，支持 ARMv7 / ARM64。
 
+AI 接手入口：[AI_HANDOFF.md](docs/AI_HANDOFF.md)。用户仓库：[tardlk/TV](https://github.com/tardlk/TV)，默认分支 `main`。
+
 ## 首包基线
 
 0.1.0 Debug 是首个原生评审包：C 首页、真实推荐与继续观看、详情与选集、播放控制层已接入；搜索键盘保留在左侧。正式安装为空壳，不预置订阅、站点或测试影片。
@@ -34,4 +36,4 @@ python3 scripts/verify-apk.py app/build/outputs/apk/python32/debug/TV_debug-pyth
 
 HTML 设计及评审截图见 [.scratch/design](.scratch/design/README.md)。源码基线及参考见 [UPSTREAM.md](docs/UPSTREAM.md)，上游 README 原文保留在 [TVBOXOS_README.md](docs/TVBOXOS_README.md)。保留 LICENSE 与第三方声明。
 
-任务使用本地 Markdown；工作规范见 [AGENTS.md](AGENTS.md)。本项目未推送、发布，也未修改参考仓库。
+任务使用本地 Markdown；工作规范见 [AGENTS.md](AGENTS.md)。源码与文档保存到用户仓库，APK / 本机环境文件不入 Git；发布签名和发行流程仍待建立，参考仓库保持只读。

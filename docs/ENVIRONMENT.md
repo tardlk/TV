@@ -81,3 +81,9 @@ platform-tools 37.0.1 的 adb server 在本机 macOS 出现 libunwind invalid co
 已删除临时 TV_Migration_Test.avd / .ini（约 2.4 GiB）、Swift 模块缓存（约 210 MiB）、本工程各模块 build / .gradle 中间产物及一次性诊断 / 截图暂存。已验证 APK、对照截图、设备 / 单测报告与签名结果在 ignored artifacts，约 835 MiB，保留为阶段审阅和回退证据；含原 0.1.0、P1、P3、P4 包。ignored .local-test 仅约 24 KiB，保留测试地址、源检查摘要和最终构建日志，用户地址不入 Git / 正式 APK。
 
 仍由系统按需运行的共享组件：`/usr/libexec/rosetta/oahd`（Rosetta 2），保留不动；没有本项目仍运行的服务，也没有新增本项目 LaunchAgent、LaunchDaemon、登录项或 shell 启动配置。
+
+## GitHub 交接整理（2026-10-12）
+
+用户授权将源码和文档推送至 tardlk/TV 的 main。复用已有 Git / GitHub CLI，没有安装工具、启动测试服务或改动长期 AVD。补齐本仓库部分克隆缺失的上游历史对象以保留完整提交历史；本地 .git 从约 31 MiB 增至约 75 MiB，属于源码历史，长期保留。origin 指向用户仓库，upstream 保留只读来源。
+
+当前树移除未使用的上游签名文件，后续本机签名材料由 .gitignore 排除；原上游历史、许可证和工作流参考保留。APK、测试地址、机器配置与工具环境仍留在 ignored 本地目录。本次整理不改变应用实现及既有测试结论，验证文档指针、版本库完整性和远程内容，不重建已清理的 Android 构建环境。
