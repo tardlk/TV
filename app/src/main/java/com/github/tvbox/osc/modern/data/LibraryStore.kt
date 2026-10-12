@@ -8,6 +8,7 @@ import kotlinx.coroutines.withContext
 
 interface LibraryStore {
     suspend fun recent(limit: Int = 20): List<HistoryEntry>
+    suspend fun isCollected(ref: ContentRef): Boolean = collections().any { it.item.ref == ref }
     suspend fun collections(): List<CollectionEntry>
     suspend fun removeRecent(ref: ContentRef)
     suspend fun clearRecent()
@@ -22,6 +23,7 @@ class LegacyLibraryStore : LibraryStore {
                 poster = record.pic.orEmpty(), note = record.note.orEmpty()), record.playNote.orEmpty())
         }
     }
+    override suspend fun isCollected(ref: ContentRef): Boolean = withContext(Dispatchers.IO) { RoomDataManger.isVodCollect(ref.sourceKey, ref.id) }
     override suspend fun collections(): List<CollectionEntry> = withContext(Dispatchers.IO) {
         RoomDataManger.getAllVodCollect().map { record ->
             CollectionEntry(record.id, ContentItem(ContentRef(record.sourceKey.orEmpty(), record.vodId.orEmpty()),

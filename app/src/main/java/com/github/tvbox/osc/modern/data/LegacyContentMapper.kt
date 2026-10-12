@@ -23,6 +23,7 @@ internal fun Movie.Video.toDetails(source: String) = ContentDetails(
 )
 
 object LegacyContentSnapshots {
+    @JvmStatic fun item(video: Movie.Video, sourceKey: String): ContentItem = video.toContent(sourceKey)
     @JvmStatic fun fromVideos(videos: List<Movie.Video>?, sourceKey: String): List<ContentItem> = videos.orEmpty().filterNotNull().map { it.toContent(sourceKey) }
     @JvmStatic fun toVideo(item: ContentItem): Movie.Video = Movie.Video().apply {
         id = item.ref.id; sourceKey = item.ref.sourceKey; name = item.title; pic = item.poster

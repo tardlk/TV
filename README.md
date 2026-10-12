@@ -1,8 +1,8 @@
 # TV
 
-独立 Android TV 应用，以 TVBoxOS 为功能基线，继承 AVBox 的视觉风格。使用 Java / XML，复用原源引擎、播放器和遥控器控制链。设计采用顶部导航 C；Android 9+，支持 ARMv7 / ARM64。
+独立 Android TV 应用，以 TVBoxOS 为功能基线，继承 AVBox 的视觉风格。逐步迁移至 Kotlin / Compose，复用原源引擎、播放器和遥控器控制链。设计采用顶部导航 C；Android 9+，支持 ARMv7 / ARM64。
 
-## 当前版本
+## 首包基线
 
 0.1.0 Debug 是首个原生评审包：C 首页、真实推荐与继续观看、详情与选集、播放控制层已接入；搜索键盘保留在左侧。正式安装为空壳，不预置订阅、站点或测试影片。
 
@@ -17,7 +17,7 @@
 
 ## 现代化执行进度
 
-保持当前 UI，按 AVBox 式路线逐步迁移。P1 构建链和 P2 状态层已通过；P3 的 Compose 顶部导航与推荐区已运行，0.2.0-dev 双 ABI 对照包在 artifacts，复杂电视控件与播放器继续复用。性能、完整状态矩阵与 ARMv7 真机验收仍未完成。详见 [执行记录](docs/MODERNIZATION.md) 与 [阶段方案](.scratch/tv-modernization/spec.md)。
+保持当前 UI，按 AVBox 式路线逐步迁移。P1 / P2 已通过；P3 首页核心已迁移 Compose，P4 历史、收藏及详情信息 / 收藏状态已接入 Kotlin，搜索和详情完整协调仍在推进。最新阶段包为 `artifacts/TV-0.2.1-dev-armv7-debug.apk` 与 `artifacts/TV-0.2.1-dev-arm64-debug.apk`；23 项单测、8 项 ARM64 TV 设备测试通过，复杂电视控件与播放器继续复用。性能、完整生命周期 / 状态矩阵与 ARMv7 真机验收仍未完成。详见 [执行记录](docs/MODERNIZATION.md) 与 [阶段方案](.scratch/tv-modernization/spec.md)。
 
 ## 构建
 
@@ -28,7 +28,7 @@ sh scripts/android-build.sh :app:assemblePython32Debug :app:assemblePython64Debu
 python3 scripts/verify-apk.py app/build/outputs/apk/python32/debug/TV_debug-python32.apk --abi armeabi-v7a
 ```
 
-保留 Gradle 7.5、AGP 7.2.2、CatVod / QuickJS / Python。构建脚本不安装工具、不设置 shell 启动项，使用 `--no-daemon`。APK 使用本机 Debug 签名，仅供个人测试；尚未建立发布签名与发行流程。
+当前使用 Gradle 8.7 / AGP 8.6.1 / Kotlin 2.0.21，保留 CatVod / QuickJS / Python 3.8；旧构建链只作原版本回退。构建脚本不安装工具、不设置 shell 启动项，使用 `--no-daemon`。APK 使用本机 Debug 签名，仅供个人测试；尚未建立发布签名与发行流程。
 
 ## 设计与出处
 

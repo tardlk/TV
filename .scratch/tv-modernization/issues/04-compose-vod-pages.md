@@ -25,3 +25,7 @@ Blocked by: 03
 2026-10-12：历史 / 收藏 Activity 改为 Kotlin，共用 LibraryViewModel / StateFlow / LibraryStore；移除静态 Activity adapter 与确认弹窗对页面的依赖。保留原 TV 列表、toolbar、长按、确认弹窗与旧页面布局。支持 sourceKey + vodId 身份、历史字幕、缺失来源搜索回退与虚拟 push_agent 来源。
 
 整页 AndroidView 原型导致边界焦点落在 Compose 宿主；已删除整页包装，按方案保留原生列表宿主，不新增焦点框架。设备回归覆盖上移进入删除、确认删除指定来源记录、返回退出删除模式、取消清空与确认清空；17 项单元测试、8 项设备测试通过，双 ABI 构建及包检查通过。1080p 浅色收藏截图一致；历史差异仅原 ImgUtil 随机占位图颜色，文字、标题、toolbar 和卡片位置相同。其余尺寸 / 主题与详情 / 搜索仍待验收，本票继续进行。
+
+2026-10-12：详情信息区迁移 Compose，收藏通过 DetailViewModel / LibraryStore；原请求 / fallback、选集、按钮与播放器保持。23 项单元测试及最终 8 项设备测试通过；详情四组尺寸 / 主题的视觉、连续收藏确认、预览 → 全屏及暂停 / 恢复通过，没有重建 Fragment / 视频 View 或新增详情请求。原生按钮通过 ViewModel 防重复而保持焦点。0.2.1-dev 双 ABI Debug 包在 artifacts 根目录，包与签名检查通过。
+
+尚未完成：详情 Activity 的完整业务协调、搜索状态与页面迁移、页面重建及完整错误 / 空态矩阵。下一切片先迁移搜索，保留左侧 SearchKeyboard、原匹配 / 搜索范围 / 暂停恢复与目录行为；不重新实现遥控器框架。

@@ -22,7 +22,7 @@
 
 JDK 来自 Eclipse Temurin 官方 GitHub release；Android 命令行工具来自 Google SDK 仓库，安装前核验官方校验值。记录文件为该专用目录内的 `install-record.json`。
 
-Gradle / AGP 暂时保留 TVBoxOS 的 7.5 / 7.2.2。Python 构建命令通过 `TV_BUILD_PYTHON` 或 `-PbuildPython` 传入，替换上游 Windows 路径。
+首包保留 TVBoxOS 的 Gradle 7.5 / AGP 7.2.2；现代化工具版本以末尾补充为准。Python 构建命令通过 `TV_BUILD_PYTHON` 或 `-PbuildPython` 传入，替换上游 Windows 路径。
 
 Mac ARM64 的额外兼容处理：
 
@@ -33,7 +33,7 @@ Mac ARM64 的额外兼容处理：
 
 不设置自动启动项。构建使用 `--no-daemon`，完成后检查并停止本任务启动的 Gradle / adb 等临时进程。安装压缩包与临时测试缓存完成验证后清理；长期保留目录及实际占用在交付时补记。
 
-## 最终留存与占用（2026-10-12）
+## 首包交付时留存与占用（2026-10-12）
 
 `${HOME}/.local/share/tv-android/` 总计约 6.1 GiB，供本项目后续构建与测试长期复用：
 
@@ -63,3 +63,21 @@ platform-tools 37.0.1 的 adb server 在本机 macOS 出现 libunwind invalid co
 复用 JDK 17、Python 3.8、现有 SDK 与镜像。新增 Android platform 35（130 MiB）、build-tools 34.0.0（187 MiB）、Gradle 8.7 分发（解压与下载缓存约 270 MiB）及 Kotlin / Compose / AGP / Chaquopy 依赖，仍在同一项目专用 Gradle 缓存中。原 Gradle 7.5 留作已交付版本回退构建。安装临时日志将随验证结束清理。
 
 本轮临时 AVD TV_Migration_Test 与 adb 5039 用于原包 / 候选对照，保留的 TV_1080p_API33 未修改；详细迁移和安装提示处理见 [MODERNIZATION.md](MODERNIZATION.md)。运行期间不新增启动项，完成后停止临时服务并删除该 AVD。
+
+## 现代化 P4 切片交付后的留存与清理（2026-10-12）
+
+此处为最新实际状态，前文空间数据是各次交付的历史快照。本切片没有新增安装工具、宿主后台服务或自动启动项。专用目录 `${HOME}/.local/share/tv-android/` 约 13 GiB，长期保留以供后续阶段复用：
+
+| 内容 | 实际占用 | 保留用途 |
+| --- | ---: | --- |
+| JDK 17 | 309 MiB | 当前 Gradle / Android 工具 |
+| Python 3.8 x86_64 | 54 MiB | Chaquopy 匹配构建解释器，经 Rosetta |
+| Gradle 缓存 | 2.2 GiB | 8.7 与原 7.5 分发、已锁定构建 / Compose / Python 依赖，避免重复下载 |
+| Android SDK | 9.4 GiB | 现有 SDK / emulator / build-tools；API 30 普通镜像约 3.1 GiB，API 33 TV 镜像约 4.1 GiB；platform 35 / build-tools 34 分别约 130 / 187 MiB |
+| 长期 AVD TV_1080p_API33 | 998 MiB | 用户要求保留的 TV 模拟器；本轮未改其数据 |
+
+已停止本任务的 TV_Migration_Test 模拟器与专用 adb 5039 server；端口 5039 没有监听，未发现 Gradle / Kotlin daemon。测试内 NanoHTTPD 仅在 instrumentation 进程内运行，测试结束后停止。没有修改 / 停止其他项目服务。
+
+已删除临时 TV_Migration_Test.avd / .ini（约 2.4 GiB）、Swift 模块缓存（约 210 MiB）、本工程各模块 build / .gradle 中间产物及一次性诊断 / 截图暂存。已验证 APK、对照截图、设备 / 单测报告与签名结果在 ignored artifacts，约 835 MiB，保留为阶段审阅和回退证据；含原 0.1.0、P1、P3、P4 包。ignored .local-test 仅约 24 KiB，保留测试地址、源检查摘要和最终构建日志，用户地址不入 Git / 正式 APK。
+
+仍由系统按需运行的共享组件：`/usr/libexec/rosetta/oahd`（Rosetta 2），保留不动；没有本项目仍运行的服务，也没有新增本项目 LaunchAgent、LaunchDaemon、登录项或 shell 启动配置。

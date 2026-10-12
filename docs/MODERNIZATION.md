@@ -63,7 +63,7 @@ P2 初始接口与状态、P3 首页核心功能已通过，P4 点播页面接�
 
 可安装对照包：artifacts/TV-0.2.0-dev-armv7-debug.apk 与 TV-0.2.0-dev-arm64-debug.apk。原 0.1.0 包仍保留。测试用 117 KiB 自制 H.264 文件仅在 AndroidTest assets 内，正式 APK 不包含；其生成源码为 tests/fixtures/make-clip.swift。
 
-通过脚本 `python3 scripts/check-device.py` 执行当前四组设备检查；前提是已安装对应主包与 AndroidTest 包，并使用独立测试设备。脚本检查 instrumentation 的 OK / FAILURES 文本，不能只看 adb 的退出码。
+通过脚本 `python3 scripts/check-device.py` 执行当前五组设备检查；前提是已安装对应主包与 AndroidTest 包，并使用独立测试设备。脚本检查 instrumentation 的 OK / FAILURES 文本，不能只看 adb 的退出码。
 
 ## P4：历史与收藏切片
 
@@ -75,4 +75,22 @@ P2 初始接口与状态、P3 首页核心功能已通过，P4 点播页面接�
 
 1080p 浅色对照：收藏像素一致；历史有 134346 个像素差异，全部位于同一张卡片内（x84–418、y142–579），来自原 ImgUtil 的随机字母占位图颜色；文字、标题、toolbar 与卡片位置相同。并排截图和 JSON 留在 artifacts/modernization/p4-before、p4-library-after。其余尺寸 / 主题矩阵仍待补充。
 
-本切片 Debug 包在 artifacts/modernization/p4-library/，保留 artifacts 根目录的 P3 对照包。没有安装新工具或新增自动启动项；临时 AVD / adb 仍用于后续阶段，结束时统一停止并清理。
+本切片 Debug 包在 artifacts/modernization/p4-library/，保留 artifacts 根目录的 P3 对照包。没有安装新工具或新增自动启动项；临时 AVD / adb 已在本次 P4 切片交付后停止并清理，最新留存见 ENVIRONMENT.md。
+
+## P4：详情信息与收藏切片（0.2.1-dev）
+
+标题、来源 / 年份 / 地区 / 语言 / 类型、演员、导演及三行简介改为 Compose，使用 DetailViewModel 的不可变状态。详情 / 换源 / fallback 请求仍由原 SourceViewModel 协调，一次已接受的结果供给展示状态；此次没有引入第二条详情请求或播放解析链。选集、线路、排序、复制播放地址、顶部导航、原 PlayFragment 和 VodController 继续在原生宿主中工作。详情 Activity 的完整业务协调、搜索迁移和页面重建验收仍未完成，P4 保持进行中。
+
+收藏经 LibraryStore / Room 读取与写入，读写串行且拒绝旧来源晚到的状态；只有落盘成功才变更已收藏状态。连续确认期间保留原按钮焦点，由 ViewModel 忽略重复请求；候选曾通过禁用按钮防重复，设备回归发现原生焦点跳回顶部，已取消该做法。回归保留连续两次确认及真实 Room 结果断言。
+
+简介行距使用原生 StaticLayout 的 fallback 字体度量，保留原 XML 的 1.2 倍行距和 3mm 附加间距；API 28 即支持所用 [fallback 行距接口](https://developer.android.com/reference/android/text/StaticLayout.Builder#setUseLineSpacingFromFallbacks(boolean))。单行和原首页的度量逻辑保持。
+
+### 验证与交付
+
+- Python32 / Python64 Debug 和 AndroidTest 构建通过；23 项单元测试（首页 9、历史 / 收藏 8、详情 6）全部通过。
+- 最终 0.2.1-dev 安装后，五组共 8 项设备测试通过，涵盖原 JAR / JS / Python、真实源接口、导航、详情收藏 / 播放、列表删除 / 清空。设备检查串行运行，报告在 artifacts/modernization/p4-checkpoint-tests。
+- 旧版与候选四组 720p / 1080p、浅 / 深色各执行固定源详情、连续收藏切换、预览 → 全屏、媒体键暂停 / 恢复。保持同一播放 Fragment 和视频 View，收藏重组 / 全屏切换未增加详情请求。此证据不等于服务托管已完成，也不覆盖页面重建或音频。
+- 排除动态视频和时钟后，四组静态像素差异约 0.81%–1.41%；全部位于迁移的信息区，信息区之外像素一致。字号、折行、三行省略、行距和原生按钮位置对照通过，不宣称字体逐像素相同。并排图、原图与 JSON 在 artifacts/modernization/p4-detail-matrix。
+- 交付 artifacts/TV-0.2.1-dev-armv7-debug.apk、TV-0.2.1-dev-arm64-debug.apk（versionCode 3），包名 / Android 9 下限 / 精确 ABI / QuickJS / Python / 无预置源 / 无测试订阅 / 无测试视频与图片检查通过，APK v2 签名验证通过。原 0.1.0 / P3 包仍保留。
+
+测试图片与视频仅在 AndroidTest assets。暂时没有 ARMv7 真机；性能、完整生命周期、外部线路和直播仍按原任务跟踪，不能把本切片当作九阶段已经全部完成。

@@ -2,6 +2,8 @@ package com.github.tvbox.osc.ui.compose
 
 import android.graphics.Paint
 import android.graphics.Typeface
+import android.text.StaticLayout
+import android.text.TextPaint
 import android.util.TypedValue
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.FirstBaseline
@@ -17,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -36,7 +39,8 @@ import me.jessyan.autosize.utils.AutoSizeUtils
 @Composable
 fun TvText(value: String, size: Float, modifier: Modifier = Modifier, bold: Boolean = false,
            color: androidx.compose.ui.graphics.Color = colorResource(R.color.tv_text_primary),
-           maxLines: Int = 1, align: TextAlign = TextAlign.Start, lineSpacing: Float = 0f) {
+           maxLines: Int = 1, align: TextAlign = TextAlign.Start, lineSpacing: Float = 0f,
+           lineMultiplier: Float = 1f, styled: AnnotatedString? = null) {
     val context = LocalContext.current
     val density = LocalDensity.current
     val pixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, size, context.resources.displayMetrics)
@@ -44,18 +48,32 @@ fun TvText(value: String, size: Float, modifier: Modifier = Modifier, bold: Bool
     val metrics = remember(pixels, bold) {
         Paint().apply { textSize = pixels; typeface = Typeface.create(Typeface.SANS_SERIF, if (bold) Typeface.BOLD else Typeface.NORMAL) }.fontMetricsInt
     }
+    // TextView expands line spacing for fallback glyphs. Preserve that geometry when XML used a multiplier.
+    val nativeLines = remember(pixels, bold, maxLines, lineMultiplier, extra, value, styled) {
+        if (maxLines <= 1 || lineMultiplier == 1f) null else {
+            val content = styled?.text ?: value
+            val sample = "$content\n$content"
+            val paint = TextPaint().apply { textSize = pixels; typeface = Typeface.create(Typeface.SANS_SERIF, if (bold) Typeface.BOLD else Typeface.NORMAL) }
+            StaticLayout.Builder.obtain(sample, 0, sample.length, paint, Int.MAX_VALUE / 4)
+                .setIncludePad(true).setUseLineSpacingFromFallbacks(true).setLineSpacing(extra, lineMultiplier).build()
+        }
+    }
+    val lineStep = nativeLines?.let { it.getLineBaseline(1) - it.getLineBaseline(0) }?.toFloat()
+        ?: ((metrics.descent - metrics.ascent) * lineMultiplier + extra)
     val style = TextStyle(fontFamily = FontFamily.SansSerif, fontSize = with(density) { pixels.toSp() },
         fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal, color = color,
         textAlign = align, platformStyle = PlatformTextStyle(includeFontPadding = true),
-        lineHeight = if (maxLines > 1) with(density) { (metrics.descent - metrics.ascent + extra).toSp() } else TextUnit.Unspecified)
+        lineHeight = if (maxLines > 1) with(density) { lineStep.toSp() } else TextUnit.Unspecified)
     Layout(modifier = modifier, content = {
-        Text(value, maxLines = maxLines, overflow = TextOverflow.Ellipsis, style = style)
+        Text(styled ?: AnnotatedString(value), maxLines = maxLines, overflow = TextOverflow.Ellipsis, style = style)
     }) { children, constraints ->
         val text = children.single().measure(constraints.copy(minHeight = 0, maxHeight = Constraints.Infinity))
         val first = text[FirstBaseline]
         val last = text[LastBaseline]
-        val height = constraints.constrainHeight(metrics.bottom - metrics.top + (last - first).coerceAtLeast(0))
-        layout(text.width, height) { text.place(0, -metrics.top - first) }
+        val baseline = nativeLines?.getLineBaseline(0) ?: -metrics.top
+        val bottom = nativeLines?.let { it.height - it.getLineBaseline(it.lineCount - 1) } ?: metrics.bottom
+        val height = constraints.constrainHeight(baseline + bottom + (last - first).coerceAtLeast(0))
+        layout(text.width, height) { text.place(0, baseline - first) }
     }
 }
 

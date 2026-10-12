@@ -33,6 +33,13 @@ import androidx.recyclerview.widget.LinearSmoothScroller;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.github.tvbox.osc.R;
+import com.github.tvbox.osc.modern.detail.DetailViewModel;
+import com.github.tvbox.osc.modern.detail.DetailInfo;
+import com.github.tvbox.osc.modern.detail.DetailUiBindings;
+import com.github.tvbox.osc.modern.model.ContentRef;
+import com.github.tvbox.osc.modern.data.LegacyContentSnapshots;
+import com.github.tvbox.osc.ui.compose.TvDetailInfoView;
+import com.github.tvbox.osc.ui.compose.TvDetailDescriptionView;
 import com.github.tvbox.osc.api.ApiConfig;
 import com.github.tvbox.osc.base.App;
 import com.github.tvbox.osc.base.BaseActivity;
@@ -103,17 +110,8 @@ public class DetailActivity extends BaseActivity {
     private PlayFragment playFragment = null;
     private View thumbContainer;
     private ImageView ivThumb;
-    private TextView tvName;
-    private TextView tvYear;
-    private TextView tvSite;
-    private TextView tvArea;
-    private TextView tvLang;
-    private TextView tvType;
-    private TextView tvActor;
-    private TextView tvDirector;
     private TextView tvPlayUrl;
     private TextView copyPlayUrl;
-    private TextView tvDes;
     private TextView tvPlay;
 //    private TextView tvSort;
     private TextView tvDesc;
@@ -128,6 +126,7 @@ public class DetailActivity extends BaseActivity {
     private LinearLayout mEmptyPlayList;
     private LinearLayout tvSeriesGroup;
     private SourceViewModel sourceViewModel;
+    private DetailViewModel detailViewModel;
     private Movie.Video mVideo;
     private VodInfo vodInfo;
     private SeriesFlagAdapter seriesFlagAdapter;
@@ -202,18 +201,9 @@ public class DetailActivity extends BaseActivity {
         thumbContainer = findViewById(R.id.thumbContainer);
         ivThumb = findViewById(R.id.ivThumb);
         applyThumbPreviewStyle();
-        tvName = findViewById(R.id.tvName);
-        tvYear = findViewById(R.id.tvYear);
-        tvSite = findViewById(R.id.tvSite);
-        tvArea = findViewById(R.id.tvArea);
-        tvLang = findViewById(R.id.tvLang);
-        tvType = findViewById(R.id.tvType);
-        tvActor = findViewById(R.id.tvActor);
-        tvDirector = findViewById(R.id.tvDirector);
         tvPlayUrl = findViewById(R.id.tvPlayUrl);
         copyPlayUrl = findViewById(R.id.tvCopyPlayUrl);
         copyPlayUrl.setOnClickListener(v -> tvPlayUrl.performClick());
-        tvDes = findViewById(R.id.tvDes);
         tvPlay = findViewById(R.id.tvPlay);
 //        tvSort = findViewById(R.id.tvSort);
         tvDesc = findViewById(R.id.tvDesc);
@@ -371,21 +361,6 @@ public class DetailActivity extends BaseActivity {
             public void onClick(View v) {
                 FastClickCheckUtil.check(v);
                 startDetailFallbackFromMenu();
-            }
-        });
-        tvCollect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String text = tvCollect.getText().toString();
-                if ("加入收藏".equals(text)) {
-                    RoomDataManger.insertVodCollect(sourceKey, vodInfo);
-                    Toast.makeText(DetailActivity.this, "已加入收藏夹", Toast.LENGTH_SHORT).show();
-                    tvCollect.setText("取消收藏");
-                } else {
-                    RoomDataManger.deleteVodCollect(sourceKey, vodInfo);
-                    Toast.makeText(DetailActivity.this, "已移除收藏夹", Toast.LENGTH_SHORT).show();
-                    tvCollect.setText("加入收藏");
-                }
             }
         });
         tvPlayUrl.setOnClickListener(new View.OnClickListener() {
@@ -657,7 +632,7 @@ public class DetailActivity extends BaseActivity {
         if (vodInfo != null && vodInfo.seriesMap.get(vodInfo.playFlag).size() > 0) {
             preFlag = vodInfo.playFlag;
             //更新播放地址
-            setTextShow(tvPlayUrl, "播放地址：", vodInfo.seriesMap.get(vodInfo.playFlag).get(vodInfo.playIndex).url);
+            updatePlayUrl(vodInfo.seriesMap.get(vodInfo.playFlag).get(vodInfo.playIndex).url);
             Bundle bundle = new Bundle();
             //保存历史
             insertVod(firstsourceKey, vodInfo);
@@ -815,19 +790,14 @@ public class DetailActivity extends BaseActivity {
         mSeriesGroupView.setNextFocusDownId(down);
     }
 
-    private void setTextShow(TextView view, String tag, String info) {
-        if (view == tvPlayUrl) {
-            view.setText(tag + (info == null ? "" : info));
-            view.setVisibility(View.GONE);
-            if (copyPlayUrl != null) copyPlayUrl.setVisibility(TextUtils.isEmpty(info) ? View.GONE : View.VISIBLE);
-            return;
-        }
-        if (info == null || info.trim().isEmpty()) {
-            view.setVisibility(View.GONE);
-            return;
-        }
-        view.setVisibility(View.VISIBLE);
-        view.setText(Html.fromHtml(getHtml(tag, info)));
+    private void updatePlayUrl(String info) {
+        tvPlayUrl.setText("播放地址：" + (info == null ? "" : info));
+        tvPlayUrl.setVisibility(View.GONE);
+        if (copyPlayUrl != null) copyPlayUrl.setVisibility(TextUtils.isEmpty(info) ? View.GONE : View.VISIBLE);
+    }
+
+    private String plainHtml(String value) {
+        return value == null || value.trim().isEmpty() ? "" : Html.fromHtml(value, Html.FROM_HTML_MODE_LEGACY).toString();
     }
 
     private String removeHtmlTag(String info) {
@@ -875,6 +845,10 @@ public class DetailActivity extends BaseActivity {
 
 
     private void initViewModel() {
+        detailViewModel = new ViewModelProvider(this).get(DetailViewModel.class);
+        ((TvDetailInfoView) findViewById(R.id.detailInfo)).bind(detailViewModel);
+        ((TvDetailDescriptionView) findViewById(R.id.detailDescription)).bind(detailViewModel);
+        DetailUiBindings.bind(this, detailViewModel, tvCollect);
         sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
         sourceViewModel.detailResult.observe(this, new Observer<AbsXml>() {
             @Override
@@ -918,23 +892,18 @@ public class DetailActivity extends BaseActivity {
                     vodInfo.sourceKey = mVideo.sourceKey;
                     sourceKey = mVideo.sourceKey;
 
-                    tvName.setText(mVideo.name);
                     SourceBean displaySource = ApiConfig.get().getSource(firstsourceKey);
-                    if (displaySource == null) {
-                        displaySource = ApiConfig.get().getSource(sourceKey);
-                    }
-                    setTextShow(tvSite, "来源：", displaySource == null ? "" : displaySource.getName());
-                    setTextShow(tvYear, "年份：", mVideo.year == 0 ? "" : String.valueOf(mVideo.year));
-                    setTextShow(tvArea, "地区：", mVideo.area);
-                    setTextShow(tvLang, "语言：", mVideo.lang);
+                    if (displaySource == null) displaySource = ApiConfig.get().getSource(sourceKey);
+                    String displayType = mVideo.type;
                     if (!firstsourceKey.equals(sourceKey)) {
-                    	setTextShow(tvType, "类型：", "[" + ApiConfig.get().getSource(sourceKey).getName() + "] 解析");
-                    } else {
-                    	setTextShow(tvType, "类型：", mVideo.type);
+                        SourceBean actualSource = ApiConfig.get().getSource(sourceKey);
+                        displayType = "[" + (actualSource == null ? sourceKey : actualSource.getName()) + "] 解析";
                     }
-                    setTextShow(tvActor, "演员：", removeHtmlTag(mVideo.actor));
-                    setTextShow(tvDirector, "导演：", removeHtmlTag(mVideo.director));
-                    setTextShow(tvDes, "内容简介：", removeHtmlTag(mVideo.des));
+                    detailViewModel.present(LegacyContentSnapshots.item(mVideo, sourceKey), new DetailInfo(
+                            mVideo.name, plainHtml(displaySource == null ? "" : displaySource.getName()),
+                            mVideo.year == 0 ? "" : String.valueOf(mVideo.year), plainHtml(mVideo.area),
+                            plainHtml(mVideo.lang), plainHtml(displayType), removeHtmlTag(mVideo.actor),
+                            removeHtmlTag(mVideo.director), removeHtmlTag(mVideo.des)));
                     if (!TextUtils.isEmpty(mVideo.pic)) {
                         com.github.tvbox.osc.util.ImgUtil.load(DefaultConfig.checkReplaceProxy(mVideo.pic), ivThumb, AutoSizeUtils.mm2px(mContext, 10), AutoSizeUtils.mm2px(mContext, 680), AutoSizeUtils.mm2px(mContext, 382), mVideo.name);
                     } else {
@@ -983,7 +952,7 @@ public class DetailActivity extends BaseActivity {
                                 flag.selected = false;
                         }
                         //设置播放地址
-                        setTextShow(tvPlayUrl, "播放地址：", playingSeriesList.get(vodInfo.playIndex).url);
+                        updatePlayUrl(playingSeriesList.get(vodInfo.playIndex).url);
                         seriesFlagAdapter.setNewData(vodInfo.seriesFlags);
                         mGridViewFlag.scrollToPosition(flagScrollTo);
 
@@ -1021,14 +990,6 @@ public class DetailActivity extends BaseActivity {
                 onDetailFallbackSearchResult(absXml);
             }
         });
-    }
-
-    private String getHtml(String label, String content) {
-        if (content == null) {
-            content = "";
-        }
-        String color = String.format(java.util.Locale.ROOT, "#%06X", 0xFFFFFF & getResources().getColor(R.color.tv_text_primary));
-        return label + "<font color=\"" + color + "\">" + content + "</font>";
     }
 
     private String  vod_picture="";
@@ -1070,13 +1031,8 @@ public class DetailActivity extends BaseActivity {
             llLayout.removeCallbacks(detailFallbackDetailTimeout);
             llLayout.postDelayed(detailFallbackDetailTimeout, DETAIL_FALLBACK_DETAIL_TIMEOUT_MS);
         }
+        detailViewModel.begin(new ContentRef(sourceKey, vodId));
         sourceViewModel.getDetail(sourceKey, vodId, fallback && detailFallbackActive);
-        boolean isVodCollect = RoomDataManger.isVodCollect(sourceKey, vodId);
-        if (isVodCollect) {
-            tvCollect.setText("取消收藏");
-        } else {
-            tvCollect.setText("加入收藏");
-        }
     }
 
     private void handleEmptyDetail(AbsXml data) {
@@ -2150,6 +2106,6 @@ public class DetailActivity extends BaseActivity {
 
     private void setTvPlayUrl(String url)
     {
-        setTextShow(tvPlayUrl, "播放地址：", url);
+        updatePlayUrl(url);
     }
 }
