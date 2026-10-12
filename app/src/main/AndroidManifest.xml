@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.github.tvbox.osc">
 
     <uses-feature
         android:name="android.software.leanback"
-        android:required="false" />
+        android:required="false"/>
     <uses-feature
         android:name="android.hardware.touchscreen"
-        android:required="false" />
+        android:required="false"/>
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -22,10 +23,10 @@
     <application
         android:name=".base.App"
         android:allowBackup="true"
-        android:banner="@drawable/app_banner"
+        android:banner="@drawable/tv_app_banner"
         android:configChanges="orientation|keyboardHidden|screenSize"
         android:hardwareAccelerated="true"
-        android:icon="@drawable/app_icon"
+        android:icon="@drawable/tv_app_icon"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:networkSecurityConfig="@xml/network_security_config"
@@ -47,42 +48,42 @@
 
         <activity
             android:name=".ui.activity.LivePlayActivity"
-            android:screenOrientation="sensorLandscape" />
+            android:screenOrientation="sensorLandscape"/>
         <activity
             android:name=".ui.activity.DetailActivity"
             android:configChanges="orientation|screenSize"
-            android:screenOrientation="sensorLandscape" />
+            android:screenOrientation="sensorLandscape"/>
         <activity
             android:name=".ui.activity.PushActivity"
-            android:screenOrientation="sensorLandscape" />
+            android:screenOrientation="sensorLandscape"/>
         <activity
             android:name=".ui.activity.SearchActivity"
             android:windowSoftInputMode="stateHidden|adjustResize"
-            android:screenOrientation="sensorLandscape" />
+            android:screenOrientation="sensorLandscape"/>
         <activity
             android:name=".ui.activity.FastSearchActivity"
-            android:screenOrientation="sensorLandscape" />
+            android:screenOrientation="sensorLandscape"/>
         <activity
             android:name=".ui.activity.SettingActivity"
-            android:screenOrientation="sensorLandscape" />
+            android:screenOrientation="sensorLandscape"/>
         <activity
             android:name=".ui.activity.HistoryActivity"
-            android:screenOrientation="sensorLandscape" />
+            android:screenOrientation="sensorLandscape"/>
         <activity
             android:name=".ui.activity.CollectActivity"
-            android:screenOrientation="sensorLandscape" />
+            android:screenOrientation="sensorLandscape"/>
         <activity
             android:name=".ui.activity.LocalFileActivity"
-            android:screenOrientation="sensorLandscape" />
+            android:screenOrientation="sensorLandscape"/>
 
         <service
             android:name=".dlna.DLNACastService"
-            android:exported="false" />
+            android:exported="false"/>
 
         <service
             android:name=".player.MusicPlaybackService"
             android:foregroundServiceType="mediaPlayback"
-            android:exported="false" />
+            android:exported="false"/>
 
         <receiver
             android:name=".receiver.SearchReceiver"
@@ -113,22 +114,22 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
+                android:resource="@xml/file_paths"/>
         </provider>
 
         <meta-data
             android:name="design_width_in_dp"
-            android:value="1280" />
+            android:value="1280"/>
         <meta-data
             android:name="design_height_in_dp"
-            android:value="720" />
+            android:value="720"/>
 
         <meta-data
             android:name="xwalk_enable_download_mode"
-            android:value="enable" />
+            android:value="enable"/>
         <meta-data
             android:name="xwalk_verify"
-            android:value="disable" />
+            android:value="disable"/>
     </application>
 
 </manifest>

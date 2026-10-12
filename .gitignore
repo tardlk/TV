@@ -101,3 +101,8 @@ lint/tmp/
 .temp/
 output-metadata.json
 .py/
+.local-test/
+artifacts/
+!AGENTS.md
+!docs/**/*.md
+!.scratch/**/*.md

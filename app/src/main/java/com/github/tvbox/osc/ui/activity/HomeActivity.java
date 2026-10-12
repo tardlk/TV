@@ -110,7 +110,7 @@ public class HomeActivity extends BaseActivity {
         @Override
         public void run() {
             Date date = new Date();
-            SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy/MM/dd  E  HH:mm", Locale.CHINA);
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
             tvDate.setText(timeFormat.format(date));
             mHandler.postDelayed(this, 1000);
         }
@@ -131,8 +131,8 @@ public class HomeActivity extends BaseActivity {
             // Re-apply the visible top state once the final display metrics are available.
             hideSysBar();
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) topLayout.getLayoutParams();
-            params.topMargin = AutoSizeUtils.mm2px(HomeActivity.this, 10.0f);
-            params.height = AutoSizeUtils.mm2px(HomeActivity.this, 50.0f);
+            params.topMargin = 0;
+            params.height = getResources().getDimensionPixelSize(R.dimen.tv_header_height);
             topLayout.setLayoutParams(params);
             topLayout.setAlpha(1.0f);
             refreshTopInfoTextSize();
@@ -171,10 +171,25 @@ public class HomeActivity extends BaseActivity {
     private void initView() {
         this.topLayout = findViewById(R.id.topLayout);
         this.tvDate = findViewById(R.id.tvDate);
-        this.tvName = findViewById(R.id.tvName);
+        this.tvName = findViewById(R.id.tvNavSource);
         this.contentLayout = findViewById(R.id.contentLayout);
         this.mGridView = findViewById(R.id.mGridView);
         this.mViewPager = findViewById(R.id.mViewPager);
+        findViewById(R.id.tvNavHome).setSelected(true);
+        findViewById(R.id.tvNavHome).setOnClickListener(v -> mGridView.setSelectedPosition(0));
+        findViewById(R.id.tvNavHome).setOnLongClickListener(v -> {
+            if (sortFocused >= 0 && sortFocused < fragments.size()) {
+                BaseLazyFragment fragment = fragments.get(sortFocused);
+                if (fragment instanceof UserFragment) refreshHomeSort();
+                else if (fragment instanceof GridFragment) ((GridFragment) fragment).forceRefresh();
+            }
+            return true;
+        });
+        findViewById(R.id.tvNavLive).setOnClickListener(v -> jumpActivity(LivePlayActivity.class));
+        findViewById(R.id.tvNavHistory).setOnClickListener(v -> jumpActivity(HistoryActivity.class));
+        findViewById(R.id.tvNavCollection).setOnClickListener(v -> jumpActivity(CollectActivity.class));
+        findViewById(R.id.tvNavSettings).setOnClickListener(v -> jumpActivity(SettingActivity.class));
+        findViewById(R.id.tvNavSearch).setOnClickListener(v -> jumpActivity(SearchActivity.class));
         this.sortAdapter = new SortAdapter();
         this.mGridView.setLayoutManager(new V7LinearLayoutManager(this.mContext, 0, false));
         this.mGridView.setSpacingWithMargins(0, AutoSizeUtils.dp2px(this.mContext, 10.0f));
@@ -201,10 +216,10 @@ public class HomeActivity extends BaseActivity {
                             textView.getPaint().setFakeBoldText(false);
                             if (sortFocused == p) {
                                 view.animate().scaleX(1.1f).scaleY(1.1f).setInterpolator(new BounceInterpolator()).setDuration(300).start();
-                                textView.setTextColor(HomeActivity.this.getResources().getColor(R.color.color_FFFFFF));
+                                textView.setTextColor(HomeActivity.this.getResources().getColor(R.color.tv_text_primary));
                             } else {
                                 view.animate().scaleX(1.0f).scaleY(1.0f).setDuration(300).start();
-                                textView.setTextColor(HomeActivity.this.getResources().getColor(R.color.color_BBFFFFFF));
+                                textView.setTextColor(HomeActivity.this.getResources().getColor(R.color.tv_text_secondary));
                                 view.findViewById(R.id.tvFilter).setVisibility(View.GONE);
                                 view.findViewById(R.id.tvFilterColor).setVisibility(View.GONE);
                             }
@@ -224,7 +239,7 @@ public class HomeActivity extends BaseActivity {
                     view.animate().scaleX(1.1f).scaleY(1.1f).setInterpolator(new BounceInterpolator()).setDuration(300).start();
                     TextView textView = view.findViewById(R.id.tvTitle);
                     textView.getPaint().setFakeBoldText(true);
-                    textView.setTextColor(HomeActivity.this.getResources().getColor(R.color.color_FFFFFF));
+                    textView.setTextColor(HomeActivity.this.getResources().getColor(R.color.tv_text_primary));
                     textView.invalidate();
                     MovieSort.SortData sortData = sortAdapter.getItem(position);
                     if (!sortData.filters.isEmpty()) {
@@ -253,15 +268,8 @@ public class HomeActivity extends BaseActivity {
         this.mGridView.setOnInBorderKeyEventListener(new TvRecyclerView.OnInBorderKeyEventListener() {
             public boolean onInBorderKeyEvent(int direction, View view) {
                 if (direction == View.FOCUS_UP) {
-                    BaseLazyFragment baseLazyFragment = fragments.get(sortFocused);
-                    if (baseLazyFragment instanceof UserFragment) {
-                        refreshHomeSort();
-                        return true;
-                    }
-                    if (baseLazyFragment instanceof GridFragment) {
-                        ((GridFragment) baseLazyFragment).forceRefresh();
-                        return true;
-                    }
+                    findViewById(R.id.tvNavHome).requestFocus();
+                    return true;
                 }
                 if (direction != View.FOCUS_DOWN) {
                     return false;
@@ -273,34 +281,12 @@ public class HomeActivity extends BaseActivity {
                 return !((GridFragment) baseLazyFragment).isLoad();
             }
         });
-        tvName.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
-                if(dataInitOk && jarInitOk){
-                    String jar=ApiConfig.get().getHomeSourceBean().getJar();
-                    String jarUrl=!jar.isEmpty()?jar:ApiConfig.get().getSpider();
-                    String jarSource = jarUrl.split(";md5;")[0];
-                    File cspCacheDir = new File(FileUtils.getFilePath() + "/csp/" + MD5.string2MD5(jarSource) + ".jar");
-                    File jarCacheDir = new File(FileUtils.getCachePath() + "/jar/" + MD5.string2MD5(jarSource) + ".jar");
-                    File jarFullCacheDir = new File(FileUtils.getCachePath() + "/jar/" + MD5.string2MD5(jarUrl) + ".jar");
-                    Toast.makeText(mContext, "缓存已清除", Toast.LENGTH_LONG).show();
-                    new Thread(() -> {
-                        try {
-                            FileUtils.deleteFile(cspCacheDir);
-                            FileUtils.deleteFile(jarCacheDir);
-                            FileUtils.deleteFile(jarFullCacheDir);
-                            FileUtils.clearSpiderCacheFiles();
-                            ApiConfig.get().clearSpiderCache();
-                            refreshHome();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }).start();
-
-                }else {
-                    jumpActivity(SettingActivity.class);
-                }
+        tvName.setOnClickListener(v -> {
+            FastClickCheckUtil.check(v);
+            if (ApiConfig.get().getSourceBeanList().isEmpty()) {
+                jumpActivity(SettingActivity.class);
+            } else {
+                showSiteSwitch();
             }
         });
         tvName.setOnLongClickListener(new View.OnLongClickListener() {
@@ -695,8 +681,8 @@ public class HomeActivity extends BaseActivity {
         if (tvName == null || tvDate == null) {
             return;
         }
-        tvName.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.ts_30));
-        tvDate.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.ts_26));
+        tvName.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.ts_20));
+        tvDate.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.ts_20));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -904,7 +890,11 @@ public class HomeActivity extends BaseActivity {
         refreshHomeRec = false;
         if (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) != 1) return;
         if (absXml == null || absXml.videoList == null || UserFragment.homeHotVodAdapter == null) return;
-        UserFragment.homeHotVodAdapter.setNewData(absXml.videoList);
+        for (BaseLazyFragment fragment : fragments) {
+            if (fragment instanceof UserFragment) {
+                ((UserFragment) fragment).setArguments(absXml.videoList);
+            }
+        }
     }
 
     private void refreshHome(final boolean restart)

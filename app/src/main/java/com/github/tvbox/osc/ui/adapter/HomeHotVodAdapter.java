@@ -27,7 +27,7 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
     private String tvRateValue;
 
     public HomeHotVodAdapter(ImgUtil.Style style, String tvRate) {
-        super(R.layout.item_user_hot_vod, new ArrayList<>());
+        super(R.layout.item_tv_continue, new ArrayList<>());
         if (style != null) {
             this.defaultWidth = ImgUtil.getStyleDefaultWidth(style);
         }
@@ -57,8 +57,8 @@ public class HomeHotVodAdapter extends BaseQuickAdapter<Movie.Video, BaseViewHol
         helper.setText(R.id.tvName, item.name);
         ImageView ivThumb = helper.getView(R.id.ivThumb);
 
-        int newWidth = ImgUtil.defaultWidth;
-        int newHeight = ImgUtil.defaultHeight;
+        int newWidth = 260;
+        int newHeight = 146;
         if (style != null) {
             newWidth = defaultWidth;
             newHeight = (int) (newWidth / style.ratio);

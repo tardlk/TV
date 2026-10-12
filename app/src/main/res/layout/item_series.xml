@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:layout_margin="@dimen/vs_5"
-    android:background="@drawable/shape_source_series_focus"
+    android:background="@drawable/tv_card_selector"
     android:focusable="true">
-
     <TextView
         android:id="@+id/tvSeries"
         android:layout_width="match_parent"
@@ -16,6 +16,6 @@
         android:marqueeRepeatLimit="marquee_forever"
         android:padding="@dimen/vs_10"
         android:singleLine="true"
-        android:textColor="@android:color/white"
-        android:textSize="@dimen/ts_20" />
+        android:textColor="@color/tv_text_primary"
+        android:textSize="@dimen/ts_20"/>
 </LinearLayout>

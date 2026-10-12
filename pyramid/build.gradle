@@ -10,7 +10,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 28
         python {
-            buildPython("D:/Programs/Python/Python38/python.exe")
+            buildPython(project.findProperty("buildPython") ?: System.getenv("TV_BUILD_PYTHON") ?: "python3")
             pip {
                 install "lxml"
                 install "ujson"

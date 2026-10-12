@@ -1,0 +1,56 @@
+<resources>
+    <color name="tv_background">#F7EFEA</color>
+    <color name="tv_surface">#FFF9F5</color>
+    <color name="tv_surface_high">#EEE1D8</color>
+    <color name="tv_text_primary">#362E29</color>
+    <color name="tv_text_secondary">#8B7B70</color>
+    <color name="tv_accent">#925B43</color>
+    <color name="tv_on_accent">#FFF8F2</color>
+    <color name="tv_selected">#EAD5C6</color>
+    <color name="tv_outline">#AD7252</color>
+    <color name="tv_line">#E4D8CE</color>
+    <color name="tv_player_surface">#202922</color>
+    <color name="tv_player_control">#303C31</color>
+    <color name="tv_player_accent">#EFC5A0</color>
+    <dimen name="tv_header_height">84mm</dimen>
+    <dimen name="tv_page_padding">48mm</dimen>
+    <dimen name="tv_preview_width">680mm</dimen>
+    <dimen name="tv_preview_height">382.5mm</dimen>
+    <string name="tv_home">首页</string>
+    <string name="tv_live">直播</string>
+    <string name="tv_history">历史</string>
+    <string name="tv_collection">收藏</string>
+    <string name="tv_settings">设置</string>
+    <string name="tv_search">搜索</string>
+    <string name="tv_add_config">添加配置</string>
+    <string name="tv_empty_title">好故事，从这里开始</string>
+    <string name="tv_empty_description">添加你自己的配置，把喜欢的内容带到大屏上。</string>
+    <string name="tv_continue_watching">继续观看</string>
+    <string name="tv_no_history">暂无观看记录，选择影片开始观看。</string>
+    <string name="tv_source_recommendations">当前片库推荐</string>
+    <string name="tv_view_details">查看详情</string>
+    <string name="tv_recommendation_empty">选择分类，寻找你想看的故事。</string>
+    <string name="tv_push">推送</string>
+    <string name="tv_play_pause">播放 / 暂停</string>
+    <string name="tv_episodes">选集</string>
+    <string name="tv_copy_media_address">复制播放地址</string>
+    <style name="TvNavigation">
+        <item name="android:layout_width">82mm</item>
+        <item name="android:layout_height">44mm</item>
+        <item name="android:layout_marginEnd">8mm</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">20mm</item>
+        <item name="android:textColor">@color/tv_text_secondary</item>
+        <item name="android:background">@drawable/tv_pill_selector</item>
+        <item name="android:focusable">true</item>
+        <item name="android:clickable">true</item>
+    </style>
+    <style
+        name="TvPrimaryButton"
+        parent="TvNavigation">
+        <item name="android:layout_width">160mm</item>
+        <item name="android:textColor">@color/tv_on_accent</item>
+        <item name="android:background">@drawable/tv_primary_selector</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

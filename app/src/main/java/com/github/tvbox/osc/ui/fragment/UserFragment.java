@@ -6,6 +6,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.animation.BounceInterpolator;
 import android.widget.LinearLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.text.Html;
+import android.text.TextUtils;
+import androidx.recyclerview.widget.RecyclerView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -55,6 +60,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import me.jessyan.autosize.utils.AutoSizeUtils;
 
 /**
  * @author pj567
@@ -72,6 +78,12 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
     private List<Movie.Video> homeSourceRec;
     public static TvRecyclerView tvHotList;
     private SourceViewModel sourceViewModel;
+    private ImageView heroImage;
+    private TextView heroTitle;
+    private TextView heroMeta;
+    private TextView heroDescription;
+    private TextView heroPlay;
+    private Movie.Video heroVod;
 
     public static UserFragment newInstance() {
         return new UserFragment();
@@ -83,6 +95,7 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
 
     public UserFragment setArguments(List<Movie.Video> recVod) {
         this.homeSourceRec = recVod;
+        refreshHero();
         return this;
     }
 
@@ -109,21 +122,8 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
             int paddingBottom = getResources().getDimensionPixelSize(R.dimen.vs_20);
             tvHotList.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
         }
-        if (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 2) {
-            List<VodInfo> allVodRecord = RoomDataManger.getAllVodRecord(20);
-            List<Movie.Video> vodList = new ArrayList<>();
-            for (VodInfo vodInfo : allVodRecord) {
-                Movie.Video vod = new Movie.Video();
-                vod.id = vodInfo.id;
-                vod.sourceKey = vodInfo.sourceKey;
-                vod.name = vodInfo.name;
-                vod.pic = vodInfo.pic;
-                if (vodInfo.playNote != null && !vodInfo.playNote.isEmpty())
-                    vod.note = "上次看到" + vodInfo.playNote;
-                vodList.add(vod);
-            }
-            homeHotVodAdapter.setNewData(vodList);
-        }
+        refreshRecentRows();
+        refreshHero();
     }
 
     @Override
@@ -157,6 +157,13 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
     protected void init() {
         EventBus.getDefault().register(this);
         sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
+        heroImage = findViewById(R.id.tvHeroImage);
+        heroTitle = findViewById(R.id.tvHeroTitle);
+        heroMeta = findViewById(R.id.tvHeroMeta);
+        heroDescription = findViewById(R.id.tvHeroDescription);
+        heroPlay = findViewById(R.id.tvHeroPlay);
+        findViewById(R.id.tvHeroArtwork).setOnClickListener(v -> openHero());
+        heroPlay.setOnClickListener(v -> openHero());
         tvLive = findViewById(R.id.tvLive);
         tvSearch = findViewById(R.id.tvSearch);
         tvSetting = findViewById(R.id.tvSetting);
@@ -185,7 +192,14 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
         }else if(Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 1){
           tvRate= homeSourceRec!=null?"站点推荐":"豆瓣热播";
         }
-        homeHotVodAdapter = new HomeHotVodAdapter(style,tvRate);
+        homeHotVodAdapter = new HomeHotVodAdapter(null, tvRate);
+        homeHotVodAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                refreshEmptyRows();
+                refreshHero();
+            }
+        });
         homeHotVodAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
@@ -198,7 +212,7 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
                     return;
                 }
 
-                if ((vod.id != null && !vod.id.isEmpty()) && (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 2) && HawkConfig.hotVodDelete) {
+                if ((vod.id != null && !vod.id.isEmpty()) && (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) != 0) && HawkConfig.hotVodDelete) {
                     homeHotVodAdapter.remove(position);
                     VodInfo vodInfo = RoomDataManger.getVodInfo(vod.sourceKey, vod.id);
                     assert vodInfo != null;
@@ -232,7 +246,7 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
                     bundle.putString("title", vod.name);
                     bundle.putString("picture", vod.pic);
                     jumpActivity(DetailActivity.class, bundle);
-                } else if ((vod.id != null && !vod.id.isEmpty()) && (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 2)) {
+                } else if ((vod.id != null && !vod.id.isEmpty()) && (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) != 0)) {
                     HawkConfig.hotVodDelete = !HawkConfig.hotVodDelete;
                     homeHotVodAdapter.notifyDataSetChanged();
                 } else {
@@ -274,15 +288,105 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
     }
 
     private void initHomeHotVod(HomeHotVodAdapter adapter) {
-        if (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 1) {
-            if (homeSourceRec != null) {
-                adapter.setNewData(homeSourceRec);
-                return;
+        if (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 0
+                && !ApiConfig.get().getSourceBeanList().isEmpty()) {
+            setDouBanData(adapter);
+        } else {
+            refreshRecentRows();
+        }
+        refreshHero();
+    }
+
+    private void refreshRecentRows() {
+        if (homeHotVodAdapter == null || Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 0) return;
+        List<Movie.Video> videos = new ArrayList<>();
+        for (VodInfo record : RoomDataManger.getAllVodRecord(20)) {
+            Movie.Video video = new Movie.Video();
+            video.id = record.id;
+            video.sourceKey = record.sourceKey;
+            video.name = record.name;
+            video.pic = record.pic;
+            if (!TextUtils.isEmpty(record.playNote)) video.note = "上次看到 " + record.playNote;
+            videos.add(video);
+        }
+        homeHotVodAdapter.setNewData(videos);
+        refreshEmptyRows();
+    }
+
+    private void refreshEmptyRows() {
+        TextView empty = findViewById(R.id.tvHistoryEmpty);
+        if (empty != null && homeHotVodAdapter != null) {
+            empty.setVisibility(homeHotVodAdapter.getData().isEmpty() ? View.VISIBLE : View.GONE);
+        }
+        TextView title = findViewById(R.id.tvContinueTitle);
+        if (title != null) title.setText(Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 0 ? "豆瓣热播" : getString(R.string.tv_continue_watching));
+    }
+
+    private void refreshHero() {
+        if (heroTitle == null || heroImage == null || !isAdded()) return;
+        heroVod = null;
+        boolean configured = !ApiConfig.get().getSourceBeanList().isEmpty();
+        ((TextView) findViewById(R.id.tvHeroKicker)).setText(configured ? R.string.tv_source_recommendations : R.string.app_name);
+        if (configured && homeSourceRec != null) {
+            for (Movie.Video video : homeSourceRec) {
+                if (video != null && !TextUtils.isEmpty(video.name)) {
+                    heroVod = video;
+                    break;
+                }
             }
-        } else if (Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC) == 2) {
+        }
+        if (configured && heroVod == null && homeHotVodAdapter != null && !homeHotVodAdapter.getData().isEmpty()) {
+            heroVod = homeHotVodAdapter.getItem(0);
+        }
+        if (heroVod == null) {
+            heroTitle.setText(configured ? ApiConfig.get().getHomeSourceBean().getName() : getString(R.string.tv_empty_title));
+            heroMeta.setText("");
+            heroDescription.setText(configured ? R.string.tv_recommendation_empty : R.string.tv_empty_description);
+            heroPlay.setText(configured ? R.string.tv_search : R.string.tv_add_config);
+            heroImage.setScaleType(ImageView.ScaleType.FIT_XY);
+            heroImage.setImageResource(R.drawable.tv_landscape_placeholder);
             return;
         }
-        setDouBanData(adapter);
+        heroTitle.setText(heroVod.name);
+        String year = heroVod.year > 0 ? String.valueOf(heroVod.year) : "";
+        String type = heroVod.type == null ? "" : heroVod.type;
+        heroMeta.setText(year + (year.isEmpty() || type.isEmpty() ? "" : " · ") + type);
+        String description = !TextUtils.isEmpty(heroVod.des) ? Html.fromHtml(heroVod.des, Html.FROM_HTML_MODE_LEGACY).toString().trim() : heroVod.note;
+        heroDescription.setText(TextUtils.isEmpty(description) ? getString(R.string.tv_recommendation_empty) : description);
+        heroPlay.setText(R.string.tv_view_details);
+        if (TextUtils.isEmpty(heroVod.pic)) {
+            heroImage.setScaleType(ImageView.ScaleType.FIT_XY);
+            heroImage.setImageResource(R.drawable.tv_landscape_placeholder);
+        } else if (ImgUtil.isBase64Image(heroVod.pic)) {
+            heroImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            heroImage.setImageBitmap(ImgUtil.decodeBase64ToBitmap(heroVod.pic));
+        } else {
+            heroImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            ImgUtil.load(heroVod.pic, heroImage, AutoSizeUtils.mm2px(mContext, 20), AutoSizeUtils.mm2px(mContext, 612), AutoSizeUtils.mm2px(mContext, 292), heroVod.name);
+        }
+    }
+
+    private void openHero() {
+        if (ApiConfig.get().getSourceBeanList().isEmpty()) {
+            jumpActivity(SettingActivity.class);
+            return;
+        }
+        if (heroVod == null) {
+            jumpActivity(SearchActivity.class);
+            return;
+        }
+        if (!TextUtils.isEmpty(heroVod.action)) {
+            sourceViewModel.action(heroVod.sourceKey, heroVod.action);
+        } else if (heroVod.id != null && heroVod.id.startsWith("msearch:")) {
+            jumpSearch(heroVod);
+        } else {
+            Bundle bundle = new Bundle();
+            bundle.putString("id", heroVod.id);
+            bundle.putString("sourceKey", TextUtils.isEmpty(heroVod.sourceKey) ? ApiConfig.get().getHomeSourceBean().getKey() : heroVod.sourceKey);
+            bundle.putString("title", heroVod.name);
+            bundle.putString("picture", heroVod.pic);
+            jumpActivity(DetailActivity.class, bundle);
+        }
     }
 
     private void setDouBanData(HomeHotVodAdapter adapter) {

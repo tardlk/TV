@@ -826,7 +826,7 @@ public class ApiConfig {
         if(live_api_url.isEmpty() || apiUrl.equals(live_api_url)){
             LOG.i("echo-load-config_live");
             initLiveSettings();
-            if(infoJson.has("lives")){
+            if(infoJson.has("lives") && infoJson.getAsJsonArray("lives").size() > 0){
                 JsonArray lives_groups=infoJson.get("lives").getAsJsonArray();
                 int live_group_index=getLiveGroupIndex();
                 if(live_group_index>lives_groups.size()-1)live_group_index=0;

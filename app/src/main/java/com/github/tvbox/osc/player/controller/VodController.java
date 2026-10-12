@@ -216,6 +216,7 @@ public class VodController extends BaseController {
     LinearLayout mProgressRoot;
     TextView mProgressText;
     ImageView mProgressIcon;
+    private ImageView playToggle;
     ImageView mLockView;
     LinearLayout mBottomRoot;
     LinearLayout mPlayBtnGroup;
@@ -319,6 +320,14 @@ public class VodController extends BaseController {
     @Override
     protected void initView() {
         super.initView();
+        playToggle = findViewById(R.id.tvPlayToggle);
+        playToggle.setOnClickListener(v -> togglePlay());
+        findViewById(R.id.tvEpisodePicker).setOnClickListener(v -> {
+            if (listener != null) {
+                listener.showEpisodeDialog();
+                hideBottom();
+            }
+        });
         mCurrentTime = findViewById(R.id.curr_time);
         mTotalTime = findViewById(R.id.total_time);
         mPlayTitle = findViewById(R.id.tv_info_name);
@@ -1497,6 +1506,7 @@ public class VodController extends BaseController {
     @Override
     protected void onPlayStateChanged(int playState) {
         super.onPlayStateChanged(playState);
+        if (playToggle != null) playToggle.setSelected(playState == VideoView.STATE_PLAYING);
         videoPlayState = playState;
         switch (playState) {
             case VideoView.STATE_IDLE:

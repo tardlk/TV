@@ -112,6 +112,7 @@ public class DetailActivity extends BaseActivity {
     private TextView tvActor;
     private TextView tvDirector;
     private TextView tvPlayUrl;
+    private TextView copyPlayUrl;
     private TextView tvDes;
     private TextView tvPlay;
 //    private TextView tvSort;
@@ -178,6 +179,22 @@ public class DetailActivity extends BaseActivity {
 
     private void initView() {
         llLayout = findViewById(R.id.llLayout);
+        findViewById(R.id.tvNavHome).setSelected(true);
+        findViewById(R.id.tvNavHome).setOnClickListener(v -> {
+            Intent home = new Intent(this, HomeActivity.class);
+            home.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(home);
+            finish();
+        });
+        findViewById(R.id.tvNavLive).setOnClickListener(v -> jumpActivity(LivePlayActivity.class));
+        findViewById(R.id.tvNavHistory).setOnClickListener(v -> jumpActivity(HistoryActivity.class));
+        findViewById(R.id.tvNavCollection).setOnClickListener(v -> jumpActivity(CollectActivity.class));
+        findViewById(R.id.tvNavSettings).setOnClickListener(v -> jumpActivity(SettingActivity.class));
+        findViewById(R.id.tvNavSearch).setOnClickListener(v -> jumpActivity(SearchActivity.class));
+        TextView sourceLabel = findViewById(R.id.tvNavSource);
+        sourceLabel.setText(ApiConfig.get().getHomeSourceBean() == null ? getString(R.string.tv_add_config) : ApiConfig.get().getHomeSourceBean().getName());
+        sourceLabel.setFocusable(false);
+        ((TextView) findViewById(R.id.tvDate)).setText(new java.text.SimpleDateFormat("HH:mm", java.util.Locale.CHINA).format(new java.util.Date()));
         llPlayerPlace = findViewById(R.id.previewPlayerPlace);
         llPlayerFragmentContainer = findViewById(R.id.previewPlayer);
         llPlayerFragmentContainerBlock = findViewById(R.id.previewPlayerBlock);
@@ -194,6 +211,8 @@ public class DetailActivity extends BaseActivity {
         tvActor = findViewById(R.id.tvActor);
         tvDirector = findViewById(R.id.tvDirector);
         tvPlayUrl = findViewById(R.id.tvPlayUrl);
+        copyPlayUrl = findViewById(R.id.tvCopyPlayUrl);
+        copyPlayUrl.setOnClickListener(v -> tvPlayUrl.performClick());
         tvDes = findViewById(R.id.tvDes);
         tvPlay = findViewById(R.id.tvPlay);
 //        tvSort = findViewById(R.id.tvSort);
@@ -400,7 +419,7 @@ public class DetailActivity extends BaseActivity {
                     if (vodInfo.playIndex >= 0) customSeriesScrollPos(vodInfo.playIndex);
                     if(currentSeriesGroupView != null) {
                         TextView txtView = currentSeriesGroupView.findViewById(R.id.tvSeriesFlag);
-                        txtView.setTextColor(Color.WHITE);
+                        txtView.setTextColor(getResources().getColor(R.color.tv_text_primary));
                     }
                 }
             }
@@ -546,7 +565,7 @@ public class DetailActivity extends BaseActivity {
             @Override
             public void onItemPreSelected(TvRecyclerView parent, View itemView, int position) {
                 TextView txtView = itemView.findViewById(R.id.tvSeriesFlag);
-                txtView.setTextColor(Color.WHITE);
+                txtView.setTextColor(getResources().getColor(R.color.tv_text_primary));
 //                currentSeriesGroupView = null;
             }
 
@@ -575,7 +594,7 @@ public class DetailActivity extends BaseActivity {
                     }
                 }
             } else {
-                tvSeriesSort.setTextColor(Color.WHITE);
+                tvSeriesSort.setTextColor(getResources().getColor(R.color.tv_text_primary));
             }
         });
         seriesGroupAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
@@ -590,7 +609,7 @@ public class DetailActivity extends BaseActivity {
                 }
                 if(currentSeriesGroupView != null) {
                     TextView txtView = currentSeriesGroupView.findViewById(R.id.tvSeriesFlag);
-                    txtView.setTextColor(Color.WHITE);
+                    txtView.setTextColor(getResources().getColor(R.color.tv_text_primary));
                 }
                 currentSeriesGroupView = view;
                 currentSeriesGroupView.isSelected();
@@ -797,6 +816,12 @@ public class DetailActivity extends BaseActivity {
     }
 
     private void setTextShow(TextView view, String tag, String info) {
+        if (view == tvPlayUrl) {
+            view.setText(tag + (info == null ? "" : info));
+            view.setVisibility(View.GONE);
+            if (copyPlayUrl != null) copyPlayUrl.setVisibility(TextUtils.isEmpty(info) ? View.GONE : View.VISIBLE);
+            return;
+        }
         if (info == null || info.trim().isEmpty()) {
             view.setVisibility(View.GONE);
             return;
@@ -911,7 +936,7 @@ public class DetailActivity extends BaseActivity {
                     setTextShow(tvDirector, "导演：", removeHtmlTag(mVideo.director));
                     setTextShow(tvDes, "内容简介：", removeHtmlTag(mVideo.des));
                     if (!TextUtils.isEmpty(mVideo.pic)) {
-                        com.github.tvbox.osc.util.ImgUtil.load(DefaultConfig.checkReplaceProxy(mVideo.pic), ivThumb, AutoSizeUtils.mm2px(mContext, 10), AutoSizeUtils.mm2px(mContext, 300), AutoSizeUtils.mm2px(mContext, 400), mVideo.name);
+                        com.github.tvbox.osc.util.ImgUtil.load(DefaultConfig.checkReplaceProxy(mVideo.pic), ivThumb, AutoSizeUtils.mm2px(mContext, 10), AutoSizeUtils.mm2px(mContext, 680), AutoSizeUtils.mm2px(mContext, 382), mVideo.name);
                     } else {
                         ivThumb.setImageDrawable(com.github.tvbox.osc.util.ImgUtil.createTextDrawable(mVideo.name));
                     }
@@ -1002,7 +1027,8 @@ public class DetailActivity extends BaseActivity {
         if (content == null) {
             content = "";
         }
-        return label + "<font color=\"#FFFFFF\">" + content + "</font>";
+        String color = String.format(java.util.Locale.ROOT, "#%06X", 0xFFFFFF & getResources().getColor(R.color.tv_text_primary));
+        return label + "<font color=\"" + color + "\">" + content + "</font>";
     }
 
     private String  vod_picture="";

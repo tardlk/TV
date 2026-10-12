@@ -1,0 +1,24 @@
+{
+  "jdk": "OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.20.1_1.tar.gz",
+  "jdk_source": "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.20.1_1.tar.gz",
+  "android_tools": "12.0",
+  "android_tools_source": "https://dl.google.com/android/repository/commandlinetools-mac-11076708_latest.zip",
+  "platform_tools": {
+    "version": "35.0.2",
+    "source": "https://dl.google.com/android/repository/platform-tools_r35.0.2-darwin.zip",
+    "sha256": "1820078db90bf21628d257ff052528af1c61bb48f754b3555648f5652fa35d78",
+    "reason": "37.0.1 adb server aborts on this macOS host with invalid compact unwind encoding"
+  },
+  "python_build": {
+    "version": "3.8.19",
+    "source": "https://github.com/astral-sh/python-build-standalone/releases/download/20240814/cpython-3.8.19%2B20240814-x86_64-apple-darwin-install_only.tar.gz",
+    "architecture": "x86_64 via Rosetta",
+    "sha256": "e13c7afca48e8ef64b38261567bb3b496276d097435d1404636f335447c992c3"
+  },
+  "emulator": {
+    "version": "37.2.12",
+    "source": "Google Android SDK repository",
+    "retained_image": "system-images;android-30;google_apis;arm64-v8a"
+  },
+  "cleanup": "Downloads, temporary AVDs, unused ATD image and test compiler caches removed; project temporary services stopped."
+}

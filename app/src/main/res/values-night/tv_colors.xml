@@ -1,0 +1,12 @@
+<resources>
+    <color name="tv_background">#201D1B</color>
+    <color name="tv_surface">#302A26</color>
+    <color name="tv_surface_high">#3B322C</color>
+    <color name="tv_text_primary">#F2E5D9</color>
+    <color name="tv_text_secondary">#B9A89B</color>
+    <color name="tv_accent">#E6B696</color>
+    <color name="tv_on_accent">#352317</color>
+    <color name="tv_selected">#594335</color>
+    <color name="tv_outline">#E6B696</color>
+    <color name="tv_line">#4A3D34</color>
+</resources>
