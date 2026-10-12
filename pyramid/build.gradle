@@ -4,24 +4,13 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    namespace "com.undcover.freedom.pyramid"
+    compileSdk 35
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 28
         targetSdkVersion 28
-        python {
-            buildPython(project.findProperty("buildPython") ?: System.getenv("TV_BUILD_PYTHON") ?: "python3")
-            pip {
-                install "lxml"
-                install "ujson"
-                install "pyquery==2.0.2"
-                install "requests"
-                install "jsonpath"
-                install "cachetools"
-                install 'pycryptodome'
-                install 'beautifulsoup4'
-            }
-        }
+
     }
 
     flavorDimensions "mode"
@@ -64,12 +53,19 @@ android {
             // Android代码模块
             setRoot "src/main"
             // Python代码模块，也就是你的Python源码所在项目中的文件夹
-            python.srcDirs = ["src/python"]
         }
     }
-    buildToolsVersion '30.0.3'
 }
 
 dependencies {
 
+}
+
+chaquopy {
+    defaultConfig {
+        version "3.8"
+        buildPython(project.findProperty("buildPython") ?: System.getenv("TV_BUILD_PYTHON") ?: "python3")
+        pip { install "-r", "requirements.txt" }
+    }
+    sourceSets { main { srcDir "src/python" } }
 }

@@ -1,7 +1,18 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+}
 
 android {
-    compileSdkVersion 33
+    namespace "com.github.tvbox.osc"
+    compileSdkVersion 35
+
+    buildFeatures {
+        compose true
+        buildConfig true
+    }
+    kotlinOptions { jvmTarget = "1.8" }
 
     defaultConfig {
         applicationId 'com.coke.tv'
@@ -9,6 +20,7 @@ android {
         versionCode 1
         versionName '0.1.0'
         multiDexEnabled true
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         //设置room的Schema的位置
         javaCompileOptions {
             annotationProcessorOptions {
@@ -142,6 +154,21 @@ repositories {
 
 }
 dependencies {
+    implementation platform(libs.compose.bom)
+    implementation libs.compose.ui
+    implementation libs.compose.foundation
+    implementation libs.tv.material
+    implementation libs.compose.tooling.preview
+    debugImplementation libs.compose.tooling
+    implementation libs.activity.compose
+    implementation libs.lifecycle.compose
+    implementation libs.lifecycle.viewmodel
+    implementation libs.coroutines.android
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+
     api fileTree(dir: "libs", include: ["*.jar","*.aar"])
 
     implementation 'org.nanohttpd:nanohttpd:2.3.1'

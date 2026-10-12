@@ -1,0 +1,28 @@
+[versions]
+agp = "8.6.1"
+kotlin = "2.0.21"
+chaquopy = "16.1.0"
+compose-bom = "2024.10.01"
+tv-material = "1.0.1"
+lifecycle = "2.8.7"
+activity = "1.9.3"
+coroutines = "1.9.0"
+
+[libraries]
+compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
+compose-ui = { module = "androidx.compose.ui:ui" }
+compose-foundation = { module = "androidx.compose.foundation:foundation" }
+compose-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+compose-tooling = { module = "androidx.compose.ui:ui-tooling" }
+tv-material = { module = "androidx.tv:tv-material", version.ref = "tv-material" }
+activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
+lifecycle-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+chaquopy = { id = "com.chaquo.python", version.ref = "chaquopy" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

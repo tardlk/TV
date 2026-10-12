@@ -106,3 +106,5 @@ artifacts/
 !AGENTS.md
 !docs/**/*.md
 !.scratch/**/*.md
+
+app/src/androidTest/assets/engine-smoke.jar

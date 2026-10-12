@@ -1,0 +1,17 @@
+beautifulsoup4==4.15.0
+cachetools==5.5.2
+certifi==2026.7.22
+chaquopy-libxml2==2.9.8
+chaquopy-libxslt==1.1.32
+charset-normalizer==3.5.2
+cssselect==1.2.0
+idna==3.15
+jsonpath==0.82.2
+lxml==4.6.3
+pycryptodome==3.9.4
+pyquery==2.0.2
+requests==2.32.4
+soupsieve==2.7
+typing_extensions==4.13.2
+ujson==1.35
+urllib3==2.2.3

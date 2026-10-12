@@ -4,7 +4,7 @@ Category: enhancement
 Status: ready-for-agent
 Blocked by: 01
 
-依据：[主方案](../spec.md)。本票属于方案拆分，尚未开始实施；按主方案的执行授权与阶段出口推进。
+依据：[主方案](../spec.md)。P1 已通过，用户已授权本票；进行中。
 
 ## 工作与验证
 

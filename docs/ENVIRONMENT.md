@@ -57,3 +57,9 @@ platform-tools 37.0.1 的 adb server 在本机 macOS 出现 libunwind invalid co
 ## Android TV 专用设备补充（2026-10-12）
 
 应用户要求，复用已有模拟器，新增官方 `system-images;android-33;android-tv;arm64-v8a` revision 5（约 4.1 GiB）与长期 AVD `TV_1080p_API33`（约 1.0 GiB）。专用环境现合计约 11 GiB；原普通 Android API 30 镜像仍保留作对照。用途、操作、测试结果及清理见 [TV_EMULATOR.md](TV_EMULATOR.md)。没有新增本项目自动启动项；Rosetta 的系统共用服务继续保留。
+
+## 现代化 P1 构建环境补充
+
+复用 JDK 17、Python 3.8、现有 SDK 与镜像。新增 Android platform 35（130 MiB）、build-tools 34.0.0（187 MiB）、Gradle 8.7 分发（解压与下载缓存约 270 MiB）及 Kotlin / Compose / AGP / Chaquopy 依赖，仍在同一项目专用 Gradle 缓存中。原 Gradle 7.5 留作已交付版本回退构建。安装临时日志将随验证结束清理。
+
+本轮临时 AVD TV_Migration_Test 与 adb 5039 用于原包 / 候选对照，保留的 TV_1080p_API33 未修改；详细迁移和安装提示处理见 [MODERNIZATION.md](MODERNIZATION.md)。运行期间不新增启动项，完成后停止临时服务并删除该 AVD。
