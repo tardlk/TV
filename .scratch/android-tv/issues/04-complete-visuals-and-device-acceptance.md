@@ -1,7 +1,7 @@
 # 04：其余页面视觉统一与电视验收
 
 Category: enhancement
-Status: ready-for-agent
+Status: ready-for-human
 Blocked by: None
 
 - [ ] 根据首包评审完善首页、详情的视觉细节。
@@ -12,3 +12,5 @@ Blocked by: None
 ## Comments
 
 2026-10-12：首包已构建并完成 ARM64 模拟器核心点播检查。实体设备未连接；后续不重写上游焦点或按键框架。
+
+2026-10-12：后续拟采用保持原生 UI 的现代化路线，执行入口关联 `../../tv-modernization/spec.md`。本票保留首包未完成范围，待方案评审后映射到新任务，不与新路线重复推进；不表示这些需求已完成或取消。

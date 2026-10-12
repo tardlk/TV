@@ -15,6 +15,10 @@
 
 具体结果见 [验证记录](docs/VALIDATION.md)，任务见 [.scratch/android-tv](.scratch/android-tv/spec.md)。
 
+## 现代化方案（尚未实施）
+
+保持当前原生 UI，借鉴 AVBox 的 Kotlin / Compose / 状态管理与播放会话演进路线。阶段、兼容约束和九张本地任务见 [方案](.scratch/tv-modernization/spec.md)，现有 APK 与技术栈保持原状。
+
 ## 构建
 
 先检查已有工具，环境要求与留存记录见 [ENVIRONMENT.md](docs/ENVIRONMENT.md)。默认使用 `${HOME}/.local/share/tv-android` 中的专用工具；可通过环境变量覆盖。

@@ -22,3 +22,7 @@
 ARMv7 / ARM64 Python Debug APK 均构建、签名与包内容校验通过，安装包留在 artifacts。Android 11 ARM64 模拟器已验证空壳、配置导入、订阅首页 / 详情和自制 H.264 视频播放。生产配置未嵌入测试订阅。
 
 核心 C 首页、详情、选集与播放器层已实现；搜索、历史、收藏、设置和直播的完整视觉统一仍需继续。ARMv7 实体电视及外部线路播放尚未完成验收。详见 docs/VALIDATION.md 与后续票 04。
+
+## 后续路线规划
+
+用户要求在保持当前 UI 的前提下制定 AVBox 式现代化方案。拟议路线与新任务见 [tv-modernization/spec.md](../tv-modernization/spec.md)；本文件继续记录首包现状，新方案尚未授权实施。
