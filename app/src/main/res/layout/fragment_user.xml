@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/tv_background" android:orientation="vertical" android:paddingStart="@dimen/tv_page_padding" android:paddingEnd="@dimen/tv_page_padding" android:paddingTop="12mm" android:clipChildren="false" android:clipToPadding="false">
-    <LinearLayout android:layout_width="match_parent" android:layout_height="292mm" android:orientation="horizontal">
-        <FrameLayout android:id="@+id/tvHeroArtwork" android:layout_width="612mm" android:layout_height="match_parent" android:background="@drawable/tv_card_selector" android:clipToOutline="true" android:focusable="true" android:clickable="true" android:foreground="@drawable/tv_focus_ring">
-            <ImageView android:id="@+id/tvHeroImage" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:src="@drawable/tv_landscape_placeholder" android:contentDescription="@string/tv_source_recommendations" />
-        </FrameLayout>
-        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="36mm" android:orientation="vertical" android:gravity="center_vertical">
-            <TextView android:id="@+id/tvHeroKicker" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/tv_source_recommendations" android:textColor="@color/tv_accent" android:textSize="16mm" />
-            <TextView android:id="@+id/tvHeroTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12mm" android:maxLines="1" android:ellipsize="end" android:text="@string/tv_empty_title" android:textColor="@color/tv_text_primary" android:textSize="44mm" android:textStyle="bold" />
-            <TextView android:id="@+id/tvHeroMeta" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12mm" android:maxLines="1" android:ellipsize="end" android:textColor="@color/tv_text_secondary" android:textSize="17mm" />
-            <TextView android:id="@+id/tvHeroDescription" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="15mm" android:maxLines="2" android:ellipsize="end" android:text="@string/tv_empty_description" android:textColor="@color/tv_text_secondary" android:textSize="18mm" android:lineSpacingExtra="5mm" />
-            <TextView android:id="@+id/tvHeroPlay" style="@style/TvPrimaryButton" android:layout_marginTop="22mm" android:text="@string/tv_add_config" />
-        </LinearLayout>
-    </LinearLayout>
+    <com.github.tvbox.osc.ui.compose.TvHeroView android:id="@+id/tvHomeHero" android:layout_width="match_parent" android:layout_height="292mm" />
     <LinearLayout android:layout_width="match_parent" android:layout_height="52mm" android:gravity="center_vertical" android:orientation="horizontal">
         <TextView android:id="@+id/tvContinueTitle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/tv_continue_watching" android:textColor="@color/tv_text_primary" android:textSize="22mm" android:textStyle="bold" />
         <LinearLayout android:id="@+id/tvPush" android:layout_width="80mm" android:layout_height="36mm" android:layout_marginEnd="12mm" android:background="@drawable/tv_pill_selector" android:gravity="center" android:focusable="true" android:clickable="true">

@@ -10,16 +10,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.BounceInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.github.tvbox.osc.ui.compose.TvHeaderView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -83,8 +82,7 @@ import me.jessyan.autosize.utils.AutoSizeUtils;
 public class HomeActivity extends BaseActivity {
     private LinearLayout topLayout;
     private LinearLayout contentLayout;
-    private TextView tvDate;
-    private TextView tvName;
+    private TvHeaderView header;
     private TvRecyclerView mGridView;
     private NoScrollViewPager mViewPager;
     private SourceViewModel sourceViewModel;
@@ -111,7 +109,7 @@ public class HomeActivity extends BaseActivity {
         public void run() {
             Date date = new Date();
             SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.CHINA);
-            tvDate.setText(timeFormat.format(date));
+            header.setClockText(timeFormat.format(date));
             mHandler.postDelayed(this, 1000);
         }
     };
@@ -170,14 +168,24 @@ public class HomeActivity extends BaseActivity {
 
     private void initView() {
         this.topLayout = findViewById(R.id.topLayout);
-        this.tvDate = findViewById(R.id.tvDate);
-        this.tvName = findViewById(R.id.tvNavSource);
+        this.header = findViewById(R.id.tvHomeHeader);
         this.contentLayout = findViewById(R.id.contentLayout);
         this.mGridView = findViewById(R.id.mGridView);
         this.mViewPager = findViewById(R.id.mViewPager);
-        findViewById(R.id.tvNavHome).setSelected(true);
-        findViewById(R.id.tvNavHome).setOnClickListener(v -> mGridView.setSelectedPosition(0));
-        findViewById(R.id.tvNavHome).setOnLongClickListener(v -> {
+        header.setNavigationListener(id -> {
+            if (id == R.id.tvNavHome) mGridView.setSelectedPosition(0);
+            else if (id == R.id.tvNavLive) jumpActivity(LivePlayActivity.class);
+            else if (id == R.id.tvNavHistory) jumpActivity(HistoryActivity.class);
+            else if (id == R.id.tvNavCollection) jumpActivity(CollectActivity.class);
+            else if (id == R.id.tvNavSettings) jumpActivity(SettingActivity.class);
+            else if (id == R.id.tvNavSearch) jumpActivity(SearchActivity.class);
+            else if (id == R.id.tvNavSource) {
+                FastClickCheckUtil.check(header);
+                if (ApiConfig.get().getSourceBeanList().isEmpty()) jumpActivity(SettingActivity.class);
+                else showSiteSwitch();
+            }
+        });
+        header.setHomeLongClickListener(v -> {
             if (sortFocused >= 0 && sortFocused < fragments.size()) {
                 BaseLazyFragment fragment = fragments.get(sortFocused);
                 if (fragment instanceof UserFragment) refreshHomeSort();
@@ -185,11 +193,7 @@ public class HomeActivity extends BaseActivity {
             }
             return true;
         });
-        findViewById(R.id.tvNavLive).setOnClickListener(v -> jumpActivity(LivePlayActivity.class));
-        findViewById(R.id.tvNavHistory).setOnClickListener(v -> jumpActivity(HistoryActivity.class));
-        findViewById(R.id.tvNavCollection).setOnClickListener(v -> jumpActivity(CollectActivity.class));
-        findViewById(R.id.tvNavSettings).setOnClickListener(v -> jumpActivity(SettingActivity.class));
-        findViewById(R.id.tvNavSearch).setOnClickListener(v -> jumpActivity(SearchActivity.class));
+        header.setSourceLongClickListener(v -> { jumpActivity(SettingActivity.class); return true; });
         this.sortAdapter = new SortAdapter();
         this.mGridView.setLayoutManager(new V7LinearLayoutManager(this.mContext, 0, false));
         this.mGridView.setSpacingWithMargins(0, AutoSizeUtils.dp2px(this.mContext, 10.0f));
@@ -268,7 +272,7 @@ public class HomeActivity extends BaseActivity {
         this.mGridView.setOnInBorderKeyEventListener(new TvRecyclerView.OnInBorderKeyEventListener() {
             public boolean onInBorderKeyEvent(int direction, View view) {
                 if (direction == View.FOCUS_UP) {
-                    findViewById(R.id.tvNavHome).requestFocus();
+                    header.requestHomeFocus();
                     return true;
                 }
                 if (direction != View.FOCUS_DOWN) {
@@ -279,21 +283,6 @@ public class HomeActivity extends BaseActivity {
                     return false;
                 }
                 return !((GridFragment) baseLazyFragment).isLoad();
-            }
-        });
-        tvName.setOnClickListener(v -> {
-            FastClickCheckUtil.check(v);
-            if (ApiConfig.get().getSourceBeanList().isEmpty()) {
-                jumpActivity(SettingActivity.class);
-            } else {
-                showSiteSwitch();
-            }
-        });
-        tvName.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                jumpActivity(SettingActivity.class);
-                return true;
             }
         });
         setLoadSir(this.contentLayout);
@@ -330,8 +319,8 @@ public class HomeActivity extends BaseActivity {
                 updateSortData(newSortData);
                 initViewPager(absXml);
                 updateHomeRec(absXml);
-                if (home != null && home.getName() != null && !home.getName().isEmpty()) tvName.setText(home.getName());
-                tvName.clearAnimation();
+                if (home != null && home.getName() != null && !home.getName().isEmpty()) header.setSourceName(home.getName());
+                header.setSourceLoading(false);
                 homeSortLoading = false;
                 loadingSourceKey = null;
                 previousHomeName = null;
@@ -504,8 +493,8 @@ public class HomeActivity extends BaseActivity {
         SourceBean home = ApiConfig.get().getHomeSourceBean();
         homeSortLoading = keepCurrentContent;
         if (keepCurrentContent && home != null && home.getName() != null && !home.getName().isEmpty()) {
-            previousHomeName = tvName.getText() == null ? null : tvName.getText().toString();
-            tvName.setText(home.getName());
+            previousHomeName = header.getSourceName();
+            header.setSourceName(home.getName());
         }
         tvNameAnimation();
         if (home == null) {
@@ -678,11 +667,7 @@ public class HomeActivity extends BaseActivity {
     }
 
     private void refreshTopInfoTextSize() {
-        if (tvName == null || tvDate == null) {
-            return;
-        }
-        tvName.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.ts_20));
-        tvDate.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.ts_20));
+        if (header != null) header.refreshSizes();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -959,31 +944,24 @@ public class HomeActivity extends BaseActivity {
         clearHomePages();
         sortAdapter.setNewData(DefaultConfig.adjustSort(ApiConfig.get().getHomeSourceBean().getKey(), new ArrayList<>(), true));
         initViewPager(null);
-        tvName.clearAnimation();
+        header.setSourceLoading(false);
     }
 
     private void cancelHomeSortLoading() {
         homeSortLoading = false;
         loadingSourceKey = null;
-        tvName.clearAnimation();
+        header.setSourceLoading(false);
         if (previousHomeSource != null) {
             ApiConfig.get().setSourceBean(previousHomeSource);
         }
         if (previousHomeName != null && !previousHomeName.isEmpty()) {
-            tvName.setText(previousHomeName);
+            header.setSourceName(previousHomeName);
         }
         previousHomeSource = null;
         previousHomeName = null;
     }
 
-    private void tvNameAnimation()
-    {
-        tvName.clearAnimation();
-        AlphaAnimation blinkAnimation = new AlphaAnimation(0.0f, 1.0f);
-        blinkAnimation.setDuration(500);
-        blinkAnimation.setStartOffset(20);
-        blinkAnimation.setRepeatMode(Animation.REVERSE);
-        blinkAnimation.setRepeatCount(Animation.INFINITE);
-        tvName.startAnimation(blinkAnimation);
+    private void tvNameAnimation() {
+        header.setSourceLoading(true);
     }
 }

@@ -4,7 +4,7 @@ Category: enhancement
 Status: ready-for-agent
 Blocked by: 03
 
-依据：[主方案](../spec.md)。本票属于方案拆分，尚未开始实施；按主方案的执行授权与阶段出口推进。
+依据：[主方案](../spec.md)。P3 核心功能已通过，用户已授权本票；先推进历史 / 收藏的数据和界面分离，复用原生电视列表。
 
 ## 工作与验证
 

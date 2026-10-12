@@ -15,9 +15,9 @@
 
 具体结果见 [验证记录](docs/VALIDATION.md)，任务见 [.scratch/android-tv](.scratch/android-tv/spec.md)。
 
-## 现代化方案（尚未实施）
+## 现代化执行进度
 
-保持当前原生 UI，借鉴 AVBox 的 Kotlin / Compose / 状态管理与播放会话演进路线。阶段、兼容约束和九张本地任务见 [方案](.scratch/tv-modernization/spec.md)，现有 APK 与技术栈保持原状。
+保持当前 UI，按 AVBox 式路线逐步迁移。P1 构建链和 P2 状态层已通过；P3 的 Compose 顶部导航与推荐区已运行，0.2.0-dev 双 ABI 对照包在 artifacts，复杂电视控件与播放器继续复用。性能、完整状态矩阵与 ARMv7 真机验收仍未完成。详见 [执行记录](docs/MODERNIZATION.md) 与 [阶段方案](.scratch/tv-modernization/spec.md)。
 
 ## 构建
 

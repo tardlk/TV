@@ -5,12 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/tv_background">
-    <include
-        layout="@layout/tv_top_navigation"
+    <LinearLayout
         android:id="@+id/topLayout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/tv_header_height"
-        app:layout_constraintTop_toTopOf="parent"/>
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent">
+        <com.github.tvbox.osc.ui.compose.TvHeaderView
+            android:id="@+id/tvHomeHeader"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
     <LinearLayout
         android:id="@+id/contentLayout"
         android:layout_width="0dp"

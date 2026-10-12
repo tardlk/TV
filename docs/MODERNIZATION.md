@@ -50,3 +50,17 @@ P2 初始接口与状态已通过，P3 首页接入进行中。完整 ARMv7 真�
 曾稳定复现搜索回调超时：HTTP 与解析已完成，但旧 SourceViewModel 的搜索结果经 EventBus 分发，不进入 searchResult LiveData。修复只在新 adapter：按站点与 UUID token 接收原事件，结束 / 取消注销；未修改原事件或源实现。并发搜索回归测试确认结果不串。测试断言保留阶段与自有请求路径，生产代码无临时调试日志。
 
 目前有一个上游行为限制：部分目录 / 搜索解析错误在旧层已归一为空结果，adapter 无法还原错误原因。状态层能报告明确异常和超时，保留旧空结果语义，P8 拆原加载模块时再收口。这不影响正常源链与本轮状态测试通过。
+
+## P3：Compose 首页核心迁移
+
+顶部导航与主推荐区域使用 Compose for TV，保持当前 C 结构、尺寸、配色、圆角、字重和动作。复用 NativePaint 字体度量，消除 Compose 中文 fallback 行高引起的纵向偏移；通用文本 / pill 供后续页面复用。图片仍调用原 ImgUtil，分类和继续观看列表保留原生电视控件及删除 / 长按等成熟操作。原 HomeActivity 继续负责现有配置与分类流程，推荐结果作为种子进入 HomeViewModel，避免重复请求。没有改动播放器与直播控制器。
+
+验证：Python32 / Python64 Debug、9 项状态单测通过；分进程执行动态源 3 项、原源 / 收藏接口 2 项、顶部导航 / 搜索 / 设置 1 项、固定源推荐到原详情 / 全屏播放及媒体键暂停恢复 1 项，共 7 项设备测试通过。AndroidView 互操作后的 accessibility focused 标记有时不反映已显示的按钮焦点，跨区域流程以实际方向键 / 确认键动作与播放结果验证；未据此重写焦点框架。
+
+空壳四组浅深色 / 720p / 1080p 对照中，主要几何和色彩保持，约 0.56%–1.08% 像素差异主要来自字体栅格化和边缘绘制，不宣称新旧逐像素相同。固定源卡片、详情与全屏截图留在 artifacts/modernization。完整加载 / 错误 / 多记录矩阵仍待补充。
+
+性能实测：5 次 Debug 空首页，冷启动 TotalTime 中位数 349 ms，PSS 128433 KiB；原基线 243 ms / 106696 KiB，约 +43.6% / +20.4%。P1 构建升级后的对应值为 269 ms / 127089 KiB，P3 在此基础上约 +29.7% / +1.1%。新 UI 功能通过不表示达到建议性能门槛；后续需要启动剖析与 ARMv7 实测。用户确认暂时没有 ARMv7 设备，相关硬件验收保留未完成。
+
+可安装对照包：artifacts/TV-0.2.0-dev-armv7-debug.apk 与 TV-0.2.0-dev-arm64-debug.apk。原 0.1.0 包仍保留。测试用 117 KiB 自制 H.264 文件仅在 AndroidTest assets 内，正式 APK 不包含；其生成源码为 tests/fixtures/make-clip.swift。
+
+通过脚本 `python3 scripts/check-device.py` 执行当前四组设备检查；前提是已安装对应主包与 AndroidTest 包，并使用独立测试设备。脚本检查 instrumentation 的 OK / FAILURES 文本，不能只看 adb 的退出码。

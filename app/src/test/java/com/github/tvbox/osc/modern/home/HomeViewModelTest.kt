@@ -86,6 +86,12 @@ class HomeViewModelTest {
         assertEquals("Existing request", model.state.value.hero!!.title)
     }
 
+    @Test fun heroSkipsNamelessRecommendationsLikeOriginalPage() = runTest(dispatcher) {
+        sources.load = { SourceCatalog(it, emptyList(), listOf(item(it, ""), item(it, "Named"))) }
+        model.refresh(); advanceUntilIdle()
+        assertEquals("Named", model.state.value.hero!!.title)
+    }
+
     @Test fun mismatchedCatalogIsRejected() = runTest(dispatcher) {
         sources.load = { catalog("other", "Wrong source") }
         model.refresh(); advanceUntilIdle()

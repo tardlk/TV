@@ -19,7 +19,7 @@ data class HomeUiState(
     val recent: List<ContentItem> = emptyList(),
     val preferences: HomePreferences = HomePreferences(),
 ) {
-    val hero: ContentItem? get() = if (selection.selected == null) null else recommendations.firstOrNull() ?: recent.firstOrNull()
+    val hero: ContentItem? get() = if (selection.selected == null) null else recommendations.firstOrNull { it.title.isNotEmpty() } ?: recent.firstOrNull()
 }
 
 class HomeViewModel(

@@ -6,9 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.animation.BounceInterpolator;
 import android.widget.LinearLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.text.Html;
 import android.text.TextUtils;
 import androidx.recyclerview.widget.RecyclerView;
 import android.widget.Toast;
@@ -17,6 +15,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModel;
+import com.github.tvbox.osc.ui.compose.TvHeroView;
+import com.github.tvbox.osc.modern.home.HomeViewModel;
+import com.github.tvbox.osc.modern.data.LegacySourceAccess;
+import com.github.tvbox.osc.modern.data.LegacyLibraryStore;
+import com.github.tvbox.osc.modern.data.LegacySettingsStore;
+import com.github.tvbox.osc.modern.data.LegacyContentSnapshots;
+import com.github.tvbox.osc.modern.model.SourceCatalog;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.github.tvbox.osc.R;
@@ -78,12 +84,7 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
     private List<Movie.Video> homeSourceRec;
     public static TvRecyclerView tvHotList;
     private SourceViewModel sourceViewModel;
-    private ImageView heroImage;
-    private TextView heroTitle;
-    private TextView heroMeta;
-    private TextView heroDescription;
-    private TextView heroPlay;
-    private Movie.Video heroVod;
+    private HomeViewModel homeViewModel;
 
     public static UserFragment newInstance() {
         return new UserFragment();
@@ -157,13 +158,13 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
     protected void init() {
         EventBus.getDefault().register(this);
         sourceViewModel = new ViewModelProvider(this).get(SourceViewModel.class);
-        heroImage = findViewById(R.id.tvHeroImage);
-        heroTitle = findViewById(R.id.tvHeroTitle);
-        heroMeta = findViewById(R.id.tvHeroMeta);
-        heroDescription = findViewById(R.id.tvHeroDescription);
-        heroPlay = findViewById(R.id.tvHeroPlay);
-        findViewById(R.id.tvHeroArtwork).setOnClickListener(v -> openHero());
-        heroPlay.setOnClickListener(v -> openHero());
+        homeViewModel = new ViewModelProvider(this, new ViewModelProvider.Factory() {
+            @NonNull @Override public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+                if (modelClass != HomeViewModel.class) throw new IllegalArgumentException(modelClass.getName());
+                return (T) new HomeViewModel(new LegacySourceAccess(), new LegacyLibraryStore(), new LegacySettingsStore());
+            }
+        }).get(HomeViewModel.class);
+        ((TvHeroView) findViewById(R.id.tvHomeHero)).bind(homeViewModel, this::openHero);
         tvLive = findViewById(R.id.tvLive);
         tvSearch = findViewById(R.id.tvSearch);
         tvSetting = findViewById(R.id.tvSetting);
@@ -323,50 +324,20 @@ public class UserFragment extends BaseLazyFragment implements View.OnClickListen
     }
 
     private void refreshHero() {
-        if (heroTitle == null || heroImage == null || !isAdded()) return;
-        heroVod = null;
-        boolean configured = !ApiConfig.get().getSourceBeanList().isEmpty();
-        ((TextView) findViewById(R.id.tvHeroKicker)).setText(configured ? R.string.tv_source_recommendations : R.string.app_name);
-        if (configured && homeSourceRec != null) {
-            for (Movie.Video video : homeSourceRec) {
-                if (video != null && !TextUtils.isEmpty(video.name)) {
-                    heroVod = video;
-                    break;
-                }
-            }
+        if (homeViewModel == null) return;
+        String sourceKey = ApiConfig.get().getHomeSourceBean().getKey();
+        if (sourceKey == null) sourceKey = "";
+        List<Movie.Video> recommendations = homeSourceRec;
+        if (recommendations == null || recommendations.isEmpty()) {
+            recommendations = homeHotVodAdapter == null ? new ArrayList<>() : homeHotVodAdapter.getData();
         }
-        if (configured && heroVod == null && homeHotVodAdapter != null && !homeHotVodAdapter.getData().isEmpty()) {
-            heroVod = homeHotVodAdapter.getItem(0);
-        }
-        if (heroVod == null) {
-            heroTitle.setText(configured ? ApiConfig.get().getHomeSourceBean().getName() : getString(R.string.tv_empty_title));
-            heroMeta.setText("");
-            heroDescription.setText(configured ? R.string.tv_recommendation_empty : R.string.tv_empty_description);
-            heroPlay.setText(configured ? R.string.tv_search : R.string.tv_add_config);
-            heroImage.setScaleType(ImageView.ScaleType.FIT_XY);
-            heroImage.setImageResource(R.drawable.tv_landscape_placeholder);
-            return;
-        }
-        heroTitle.setText(heroVod.name);
-        String year = heroVod.year > 0 ? String.valueOf(heroVod.year) : "";
-        String type = heroVod.type == null ? "" : heroVod.type;
-        heroMeta.setText(year + (year.isEmpty() || type.isEmpty() ? "" : " · ") + type);
-        String description = !TextUtils.isEmpty(heroVod.des) ? Html.fromHtml(heroVod.des, Html.FROM_HTML_MODE_LEGACY).toString().trim() : heroVod.note;
-        heroDescription.setText(TextUtils.isEmpty(description) ? getString(R.string.tv_recommendation_empty) : description);
-        heroPlay.setText(R.string.tv_view_details);
-        if (TextUtils.isEmpty(heroVod.pic)) {
-            heroImage.setScaleType(ImageView.ScaleType.FIT_XY);
-            heroImage.setImageResource(R.drawable.tv_landscape_placeholder);
-        } else if (ImgUtil.isBase64Image(heroVod.pic)) {
-            heroImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            heroImage.setImageBitmap(ImgUtil.decodeBase64ToBitmap(heroVod.pic));
-        } else {
-            heroImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            ImgUtil.load(heroVod.pic, heroImage, AutoSizeUtils.mm2px(mContext, 20), AutoSizeUtils.mm2px(mContext, 612), AutoSizeUtils.mm2px(mContext, 292), heroVod.name);
-        }
+        homeViewModel.refresh(new SourceCatalog(sourceKey, new ArrayList<>(),
+                LegacyContentSnapshots.fromVideos(recommendations, sourceKey)));
     }
 
     private void openHero() {
+        Movie.Video heroVod = homeViewModel == null || homeViewModel.getState().getValue().getHero() == null
+                ? null : LegacyContentSnapshots.toVideo(homeViewModel.getState().getValue().getHero());
         if (ApiConfig.get().getSourceBeanList().isEmpty()) {
             jumpActivity(SettingActivity.class);
             return;
