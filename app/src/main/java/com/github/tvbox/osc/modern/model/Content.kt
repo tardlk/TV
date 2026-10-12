@@ -23,3 +23,5 @@ data class PlaybackLine(val flag: String, val episodes: List<Episode>)
 data class ContentDetails(val item: ContentItem, val actor: String, val director: String, val lines: List<PlaybackLine>)
 data class ResolvedPlayback(val responseJson: String)
 data class CollectionEntry(val recordId: Int, val item: ContentItem)
+
+data class HistoryEntry(val item: ContentItem, val playedNote: String)

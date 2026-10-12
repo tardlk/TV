@@ -57,6 +57,8 @@ class SourceAccessIntegrationTest {
             withTimeout(10_000) { loaded.await() }
             val source = LegacySourceAccess()
             assertEquals("modern-fixture", source.selection().selected!!.key)
+            assertTrue(source.supports("push_agent"))
+            assertFalse(source.selection().sources.any { it.key == "push_agent" })
             stage = "catalog"
             val home = withTimeout(3_000) { source.catalog("modern-fixture") }
             assertEquals("Adapter fixture", home.recommendations.single().title)

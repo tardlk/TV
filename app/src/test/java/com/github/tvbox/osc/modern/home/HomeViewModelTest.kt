@@ -115,7 +115,7 @@ class HomeViewModelTest {
     }
     private class FakeLibrary : LibraryStore {
         var history = emptyList<ContentItem>()
-        override suspend fun recent() = history
+        override suspend fun recent(limit: Int) = history.map { HistoryEntry(it, "") }
         override suspend fun collections(): List<CollectionEntry> = emptyList()
         override suspend fun removeRecent(ref: ContentRef) { history = history.filterNot { it.ref == ref } }
         override suspend fun clearRecent() { history = emptyList() }

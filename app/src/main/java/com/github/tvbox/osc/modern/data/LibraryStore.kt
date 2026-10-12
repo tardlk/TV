@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 interface LibraryStore {
-    suspend fun recent(): List<ContentItem>
+    suspend fun recent(limit: Int = 20): List<HistoryEntry>
     suspend fun collections(): List<CollectionEntry>
     suspend fun removeRecent(ref: ContentRef)
     suspend fun clearRecent()
@@ -16,10 +16,10 @@ interface LibraryStore {
 }
 
 class LegacyLibraryStore : LibraryStore {
-    override suspend fun recent(): List<ContentItem> = withContext(Dispatchers.IO) {
-        RoomDataManger.getAllVodRecord(20).map { record ->
-            ContentItem(ContentRef(record.sourceKey.orEmpty(), record.id.orEmpty()), record.name.orEmpty(),
-                poster = record.pic.orEmpty(), note = record.playNote.orEmpty().let { if (it.isEmpty()) "" else "上次看到 $it" })
+    override suspend fun recent(limit: Int): List<HistoryEntry> = withContext(Dispatchers.IO) {
+        RoomDataManger.getAllVodRecord(limit).map { record ->
+            HistoryEntry(ContentItem(ContentRef(record.sourceKey.orEmpty(), record.id.orEmpty()), record.name.orEmpty(),
+                poster = record.pic.orEmpty(), note = record.note.orEmpty()), record.playNote.orEmpty())
         }
     }
     override suspend fun collections(): List<CollectionEntry> = withContext(Dispatchers.IO) {

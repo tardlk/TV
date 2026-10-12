@@ -37,7 +37,7 @@ P1 新建临时 AVD TV_Migration_Test，保留的 TV_1080p_API33 数据未改。
 
 ## 后续
 
-P2 初始接口与状态已通过，P3 首页接入进行中。完整 ARMv7 真机、外部线路、直播与音频验证仍待完成。
+P2 初始接口与状态、P3 首页核心功能已通过，P4 点播页面接入进行中。完整 ARMv7 真机、外部线路、直播与音频验证仍待完成。
 
 ## P2：页面状态与旧源桥接
 
@@ -64,3 +64,15 @@ P2 初始接口与状态已通过，P3 首页接入进行中。完整 ARMv7 真�
 可安装对照包：artifacts/TV-0.2.0-dev-armv7-debug.apk 与 TV-0.2.0-dev-arm64-debug.apk。原 0.1.0 包仍保留。测试用 117 KiB 自制 H.264 文件仅在 AndroidTest assets 内，正式 APK 不包含；其生成源码为 tests/fixtures/make-clip.swift。
 
 通过脚本 `python3 scripts/check-device.py` 执行当前四组设备检查；前提是已安装对应主包与 AndroidTest 包，并使用独立测试设备。脚本检查 instrumentation 的 OK / FAILURES 文本，不能只看 adb 的退出码。
+
+## P4：历史与收藏切片
+
+历史 / 收藏已改为 Kotlin Activity 和共用 LibraryViewModel。不可变 StateFlow 驱动列表，LibraryStore 继续委派 Room；删除使用 sourceKey + vodId，读取和写入在 IO 线程执行，写操作序列化，晚到的旧读取不能覆盖新列表。确认清空弹窗仅回调当前页面操作，不持有静态 Activity adapter。缺失站点的搜索回退、长按搜索、收藏详情入口以及 push_agent 虚拟站点保留原语义。
+
+原电视列表、按钮与页面布局仍作为兼容 View 保留。整页 AndroidView 的候选包装实测使方向键焦点留在 Compose 宿主；依照方案回退到原生 View 宿主，删除该包装，不发展新的焦点框架。状态和存储迁移继续保留，详情与搜索尚未完成，本票没有标记完成。
+
+验证：双 ABI 构建、17 项单元测试（首页 9、列表 8）通过。源引擎 3、源接口 2、顶部导航 1、固定源详情 / 播放 1、列表操作 1，共 8 项设备测试通过。列表测试在真实 Room 上创建 UUID 隔离记录，验证向上进入删除按钮、遥控器删除指定来源、返回退出删除模式、取消清空、确认清空收藏且不删除历史；finally 删除自己的记录。界面测试必须串行执行。
+
+1080p 浅色对照：收藏像素一致；历史有 134346 个像素差异，全部位于同一张卡片内（x84–418、y142–579），来自原 ImgUtil 的随机字母占位图颜色；文字、标题、toolbar 与卡片位置相同。并排截图和 JSON 留在 artifacts/modernization/p4-before、p4-library-after。其余尺寸 / 主题矩阵仍待补充。
+
+本切片 Debug 包在 artifacts/modernization/p4-library/，保留 artifacts 根目录的 P3 对照包。没有安装新工具或新增自动启动项；临时 AVD / adb 仍用于后续阶段，结束时统一停止并清理。

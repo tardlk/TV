@@ -4,6 +4,7 @@ import com.github.tvbox.osc.modern.model.*
 
 interface SourceAccess {
     fun selection(): SourceSelection
+    fun supports(sourceKey: String): Boolean = selection().sources.any { it.key == sourceKey }
     suspend fun catalog(sourceKey: String): SourceCatalog
     suspend fun search(sourceKey: String, query: String): List<ContentItem>
     suspend fun details(ref: ContentRef): ContentDetails

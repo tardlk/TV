@@ -41,7 +41,7 @@ class HomeViewModel(
             preferences = settings.homePreferences())
         refreshJob = viewModelScope.launch {
             try {
-                val recent = library.recent()
+                val recent = library.recent().map { it.item.copy(note = if (it.playedNote.isEmpty()) "" else "上次看到 ${it.playedNote}") }
                 if (request != generation) return@launch
                 mutableState.value = mutableState.value.copy(recent = recent)
                 val selected = selection.selected ?: return@launch

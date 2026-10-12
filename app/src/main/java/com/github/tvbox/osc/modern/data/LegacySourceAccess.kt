@@ -17,6 +17,7 @@ import kotlinx.coroutines.withTimeout
 import java.util.UUID
 
 class LegacySourceAccess : SourceAccess {
+    override fun supports(sourceKey: String) = ApiConfig.get().getSource(sourceKey) != null
     override fun selection(): SourceSelection {
         val config = ApiConfig.get()
         val options = config.sourceBeanList.map { SourceOption(it.key.orEmpty(), it.name.orEmpty()) }
