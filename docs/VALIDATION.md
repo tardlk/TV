@@ -44,3 +44,7 @@ python3 tests/fixtures/site.py --directory .local-test/fixed-site
 ```
 
 在 Android 模拟器的原配置对话框输入 `http://10.0.2.2:48979/config.json`。只绑定宿主 127.0.0.1:48979；测试结束 Ctrl-C 停止服务。样本无外部站点与第三方媒体，不属于 APK 资源。
+
+## Android TV 13 专用镜像补测
+
+在官方 API 33 ARM64 Android TV / 1080p 设备上安装同一首包，验证空壳、顶部方向导航、搜索与设置、固定配置、详情预览 / 全屏视频和媒体键暂停恢复、历史与用户订阅首页。采样得到视频停止 / 运动交替，AndroidRuntime 无崩溃；详见 [TV_EMULATOR.md](TV_EMULATOR.md)。没有改变 ARMv7 真机、外部线路与直播仍待验证的结论。

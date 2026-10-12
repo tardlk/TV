@@ -11,6 +11,8 @@
 - 用户订阅已验证加载和部分源目录/详情；外部网页嗅探线路播放尚未确认。没有连接 ARMv7 实体电视，不能用模拟器代替真机结论。
 - 直播与辅助页面沿用上游功能，完整视觉统一、各页面遥控器验收仍需后续完成。此包不表示所有 HTML 页面均已完整移植。
 
+本地已配置 Android TV 13 / 1080p 模拟器，启动与补测结果见 [TV_EMULATOR.md](docs/TV_EMULATOR.md)。
+
 具体结果见 [验证记录](docs/VALIDATION.md)，任务见 [.scratch/android-tv](.scratch/android-tv/spec.md)。
 
 ## 构建

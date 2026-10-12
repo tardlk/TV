@@ -20,5 +20,15 @@
     "source": "Google Android SDK repository",
     "retained_image": "system-images;android-30;google_apis;arm64-v8a"
   },
-  "cleanup": "Downloads, temporary AVDs, unused ATD image and test compiler caches removed; project temporary services stopped."
+  "cleanup": "Downloads, temporary AVDs, unused ATD image and test compiler caches removed; project temporary services stopped.",
+  "android_tv": {
+    "package": "system-images;android-33;android-tv;arm64-v8a",
+    "revision": 5,
+    "source": "Google Android SDK repository via sdkmanager",
+    "avd": "TV_1080p_API33",
+    "resolution": "1920x1080",
+    "image_disk": "4.1 GiB",
+    "avd_disk": "1.0 GiB",
+    "purpose": "Persistent Android TV UI and media testing"
+  }
 }

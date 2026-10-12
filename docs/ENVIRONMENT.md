@@ -53,3 +53,7 @@ platform-tools 37.0.1 的 adb server 在本机 macOS 出现 libunwind invalid co
 仍保留并可能按系统需要运行：Rosetta 2 的系统共享服务 `com.apple.oahd`，程序 `/usr/libexec/rosetta/oahd`、系统启动定义 `/System/Library/LaunchDaemons/com.apple.oahd.plist`。这是安装 Rosetta 的系统组件，不是项目后台服务，不停止或删除其他项目可能使用的系统工具。已有 Android 调试密钥与系统共享工具保持原状。
 
 上游 GitHub Actions 工作流留作 `test.yml.upstream-reference`，不再作为本工程可执行工作流；本次没有远程发布、推送或 Release 构建。安装来源与校验记录副本见 [environment-install-record.json](environment-install-record.json)。
+
+## Android TV 专用设备补充（2026-10-12）
+
+应用户要求，复用已有模拟器，新增官方 `system-images;android-33;android-tv;arm64-v8a` revision 5（约 4.1 GiB）与长期 AVD `TV_1080p_API33`（约 1.0 GiB）。专用环境现合计约 11 GiB；原普通 Android API 30 镜像仍保留作对照。用途、操作、测试结果及清理见 [TV_EMULATOR.md](TV_EMULATOR.md)。没有新增本项目自动启动项；Rosetta 的系统共用服务继续保留。
