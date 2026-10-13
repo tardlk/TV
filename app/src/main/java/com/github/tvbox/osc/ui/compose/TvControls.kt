@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.*
 import androidx.tv.material3.*
 import com.github.tvbox.osc.R
@@ -84,22 +85,25 @@ fun TvPill(text: String, modifier: Modifier = Modifier, selected: Boolean = fals
            onLongClick: (() -> Unit)? = null, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
-    val accent = colorResource(R.color.tv_accent)
-    val selectedColor = colorResource(R.color.tv_selected)
-    val foreground = colorResource(if (primary) R.color.tv_on_accent else if (textPrimary) R.color.tv_text_primary else R.color.tv_text_secondary)
+    val colors = MaterialTheme.colorScheme
+    val accent = colors.primary
+    val selectedColor = colors.primaryContainer
+    val foreground = if (primary) colors.onPrimary else if (textPrimary || selected || focused) colors.onSurface else colors.onSurfaceVariant
     val shape = RoundedCornerShape(100.dp)
     Button(onClick, modifier = modifier.then(if (focused) Modifier.border(if (primary) 3.dp else 2.dp,
-        colorResource(R.color.tv_outline), shape) else Modifier), onLongClick = onLongClick,
+        colors.border, shape) else Modifier), onLongClick = onLongClick,
         interactionSource = interaction, contentPadding = PaddingValues(horizontal = tvSize(horizontalPadding)),
         shape = ButtonDefaults.shape(shape),
         border = ButtonDefaults.border(focusedBorder = Border.None),
-        scale = ButtonDefaults.scale(focusedScale = 1f, pressedScale = 1f),
+        scale = ButtonDefaults.scale(focusedScale = 1f, pressedScale = .97f),
         colors = ButtonDefaults.colors(
-            containerColor = if (primary) accent else if (selected) selectedColor else colorResource(R.color.tv_surface),
+            containerColor = if (primary) accent else if (selected) selectedColor else Color.Transparent,
             contentColor = foreground, focusedContainerColor = if (primary) accent else selectedColor,
             focusedContentColor = foreground, pressedContainerColor = if (primary) accent else selectedColor,
             pressedContentColor = foreground,
         )) {
-        TvText(text, textSize, modifier = Modifier.fillMaxWidth(), color = foreground, bold = primary, align = TextAlign.Center)
+        Text(text, modifier = Modifier.fillMaxWidth(), color = foreground, maxLines = 1, overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center, style = MaterialTheme.typography.labelLarge.copy(fontSize = tvFont(textSize),
+                fontWeight = if (primary) FontWeight.SemiBold else FontWeight.Medium))
     }
 }

@@ -20,6 +20,7 @@ tests = args.test or [
     'com.github.tvbox.osc.modern.HomePlaybackSmokeTest',
     'com.github.tvbox.osc.modern.LibraryScreenTest',
     'com.github.tvbox.osc.modern.SearchScreenTest',
+    'com.github.tvbox.osc.modern.MaterialSettingsScreenTest',
 ]
 args.output.mkdir(parents=True, exist_ok=True)
 for test in tests:

@@ -4,7 +4,7 @@ Category: enhancement
 Status: ready-for-agent
 Blocked by: 04
 
-依据：[主方案](../spec.md)。本票属于方案拆分，尚未开始实施；按主方案的执行授权与阶段出口推进。
+依据：[主方案](../spec.md)。设置显示层已在 Material UI 样板中先行接入，完整状态迁移与直播部分继续按本票阶段出口推进。
 
 ## 工作与验证
 
@@ -21,3 +21,5 @@ Blocked by: 04
 ## Comments
 
 2026-10-12：用户要求制定保持现有 UI、借鉴 AVBox 演进方式的方案；当前仅规划。
+
+2026-10-13：按新的 [Material UI 规格](../../tv-material-ui/spec.md)先行完成设置显示层样板，29 个旧入口全部映射到原 Java 动作，保留弹窗 / Hawk 后端与可见性。方向键遍历、弹窗返回、代表性设置写入与 Activity 重建通过，详见视觉任务 01。尚未将完整设置协调迁入 SettingsStore / StateFlow；直播控制、权限与外部线路验收未在此切片完成，本票不标记通过。

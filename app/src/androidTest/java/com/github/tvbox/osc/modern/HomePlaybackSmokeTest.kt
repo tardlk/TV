@@ -98,6 +98,7 @@ class HomePlaybackSmokeTest {
             }
             assertTrue("Real recommendation must reach Compose", ready)
             SystemClock.sleep(700)
+            screenshot("home.png")
             val monitor = instrumentation.addMonitor(DetailActivity::class.java.name, null, false)
             instrumentation.runOnMainSync { home!!.findViewById<android.view.View>(id("mGridView")).requestFocus() }
             key(KeyEvent.KEYCODE_DPAD_DOWN)

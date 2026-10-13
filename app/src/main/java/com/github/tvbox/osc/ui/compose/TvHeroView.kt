@@ -7,6 +7,7 @@ import android.text.Html
 import android.util.AttributeSet
 import android.widget.ImageView
 import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
@@ -21,6 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.*
@@ -52,15 +55,18 @@ class TvHeroView @JvmOverloads constructor(context: Context, attrs: AttributeSet
             else Html.fromHtml(hero.description, Html.FROM_HTML_MODE_LEGACY).toString().trim().ifEmpty { hero.note }
                 .ifEmpty { stringResource(R.string.tv_recommendation_empty) }
         val label = stringResource(if (!configured) R.string.tv_add_config else if (hero == null) R.string.tv_search else R.string.tv_view_details)
-        Row(Modifier.fillMaxSize().semantics { testTagsAsResourceId = true }) {
+        val colors = MaterialTheme.colorScheme
+        Row(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(colors.background,
+            colors.primaryContainer.copy(alpha = .24f))), MaterialTheme.shapes.large)
+            .semantics { testTagsAsResourceId = true }) {
             val interaction = remember { MutableInteractionSource() }
             val focused by interaction.collectIsFocusedAsState()
             Button(onOpen, Modifier.width(tvSize(612f)).fillMaxHeight().testTag("com.coke.tv:id/tvHeroArtwork")
-                .then(if (focused) Modifier.border(2.dp, colorResource(R.color.tv_outline), RoundedCornerShape(20.dp)) else Modifier),
+                .then(if (focused) Modifier.border(tvSize(3f), colors.border, MaterialTheme.shapes.large) else Modifier),
                 interactionSource = interaction, contentPadding = PaddingValues(0.dp),
-                shape = ButtonDefaults.shape(RoundedCornerShape(20.dp)),
+                shape = ButtonDefaults.shape(MaterialTheme.shapes.large),
                 border = ButtonDefaults.border(focusedBorder = Border.None),
-                scale = ButtonDefaults.scale(focusedScale = 1f, pressedScale = 1f)) {
+                scale = ButtonDefaults.scale(focusedScale = 1f, pressedScale = .98f)) {
                 AndroidView(factory = { ImageView(it) }, modifier = Modifier.fillMaxSize(), update = { image ->
                     val key = hero?.poster.orEmpty() + "|" + title
                     if (image.tag != key) {
@@ -76,14 +82,18 @@ class TvHeroView @JvmOverloads constructor(context: Context, attrs: AttributeSet
                 })
             }
             Spacer(Modifier.width(tvSize(36f)))
-            Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.Center) {
-                TvText(stringResource(if (configured) R.string.tv_source_recommendations else R.string.app_name), 16f, color = colorResource(R.color.tv_accent))
+            Column(Modifier.weight(1f).fillMaxHeight().padding(end = tvSize(20f)), verticalArrangement = Arrangement.Center) {
+                Text(stringResource(if (configured) R.string.tv_source_recommendations else R.string.app_name),
+                    style = MaterialTheme.typography.labelMedium, color = colors.primary)
                 Spacer(Modifier.height(tvSize(12f)))
-                TvText(title, 44f, bold = true)
+                Text(title, style = MaterialTheme.typography.displaySmall, color = colors.onBackground,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(tvSize(12f)))
-                TvText(metadata, 17f, color = colorResource(R.color.tv_text_secondary))
+                if (metadata.isNotEmpty()) Text(metadata, style = MaterialTheme.typography.bodySmall,
+                    color = colors.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(tvSize(15f)))
-                TvText(description, 18f, color = colorResource(R.color.tv_text_secondary), maxLines = 2, lineSpacing = 5f)
+                Text(description, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant,
+                    maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(tvSize(22f)))
                 TvPill(label, Modifier.width(tvSize(160f)).height(tvSize(44f)).testTag("com.coke.tv:id/tvHeroPlay"),
                     primary = true, onClick = onOpen)

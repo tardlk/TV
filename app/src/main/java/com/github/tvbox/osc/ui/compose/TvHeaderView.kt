@@ -19,6 +19,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.Alignment
+import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Text
 import com.github.tvbox.osc.R
 
 class TvHeaderView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : AbstractComposeView(context, attrs) {
@@ -44,7 +46,8 @@ class TvHeaderView @JvmOverloads constructor(context: Context, attrs: AttributeS
         TvTheme {
             Row(Modifier.fillMaxSize().padding(horizontal = tvSize(48f)).semantics { testTagsAsResourceId = true },
                 verticalAlignment = Alignment.CenterVertically) {
-                TvText(stringResource(R.string.app_name), 32f, Modifier.width(tvSize(82f)), bold = true)
+                Text(stringResource(R.string.app_name), Modifier.width(tvSize(82f)),
+                    style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onBackground)
                 val entries = listOf(R.id.tvNavHome to R.string.tv_home, R.id.tvNavLive to R.string.tv_live,
                     R.id.tvNavHistory to R.string.tv_history, R.id.tvNavCollection to R.string.tv_collection,
                     R.id.tvNavSettings to R.string.tv_settings)
@@ -73,7 +76,7 @@ class TvHeaderView @JvmOverloads constructor(context: Context, attrs: AttributeS
                     .testTag("com.coke.tv:id/tvNavSearch"), onClick = { navigation?.onNavigate(R.id.tvNavSearch) })
                 Spacer(Modifier.width(tvSize(8f)))
                 Box(Modifier.width(tvSize(65f)).height(tvSize(44f)), contentAlignment = Alignment.Center) {
-                    TvText(clockText, 20f)
+                    Text(clockText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }

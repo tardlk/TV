@@ -95,3 +95,13 @@ platform-tools 37.0.1 的 adb server 在本机 macOS 出现 libunwind invalid co
 任务结束已停止临时 emulator 和专用 adb 5039，以及该 emulator 自动拉起的 adb 5037；两个端口无监听，未发现项目 Gradle / Kotlin daemon。删除临时 AVD、各模块 build / 工程 .gradle、生成的测试 JAR、一次性矩阵脚本与诊断暂存。测试内 HTTP 服务在 finally 停止，没有本项目仍运行的服务。
 
 长期 `${HOME}/.local/share/tv-android/` 仍约 13 GiB，构成和用途沿用前表；Gradle 依赖缓存约 2.2 GiB，长期 TV AVD 约 998 MiB。保留的 `artifacts/` 约 1.0 GiB，新增 0.2.2-dev 双 ABI Debug / 测试 APK、单测 / 设备报告与搜索视觉矩阵，供审阅、回退和继续验证；`.local-test/` 约 64 KiB，保留原测试地址与最终构建 / 矩阵日志。Rosetta 的系统共享 oahd 保留，不改变其他项目工具或服务。
+
+## Material UI 样板（2026-10-13，最新留存）
+
+复用既有 JDK / SDK / Python / Gradle、API 33 TV 镜像及 Codex bundled Pillow，没有安装新工具、启动宿主 HTTP 服务或增加自动启动项。临时 AVD TV_Material_Test 仅用于 0.2.2-dev 与 0.3.0-dev 对照和验证，长期 TV_1080p_API33 数据未改。
+
+任务结束已停止临时 emulator 与专用 adb 5039；5039 / 5037 无监听，没有项目 Gradle / Kotlin daemon 或测试 HTTP 服务。已删除临时 AVD（约 1.0 GiB）、各模块 build / 工程 .gradle（约 1.0 GiB）、生成测试 JAR、一次性矩阵 / 测量脚本、字体 API 提取 JAR、截图诊断与初步失败材料。最终构建与测试报告已先保存到 artifacts。
+
+长期 `${HOME}/.local/share/tv-android/` 仍约 13 GiB，保留用途与前表相同；长期 AVD 约 998 MiB。ignored artifacts 合计约 1.2 GiB，包含本轮 0.3.0-dev 双 ABI Debug 包（ARMv7 约 79 MiB、ARM64 约 90 MiB）及约 8.2 MiB 的 material-ui 证据，用于用户审阅和版本回退；旧包与既有证据保留。ignored .local-test 约 76 KiB，保留用户地址及最终日志，不进入 Git / 正式 APK。
+
+本项目无仍在运行的服务。Rosetta 系统共享 oahd、已有 Android 工具和 Codex bundled Python 等其他项目可能共用的工具保持原状；AVBox 参考仓库只读，用户修改未触碰。本轮只做本地提交，没有推送或上传。

@@ -21,6 +21,8 @@ public class HomeRemoteTest {
         SystemClock.sleep(120);
     }
     private AccessibilityNodeInfo root() {
+        android.app.UiAutomation automation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+        automation.setServiceInfo(automation.getServiceInfo());
         AccessibilityNodeInfo result = null;
         for (int i = 0; i < 40 && result == null; i++) {
             result = InstrumentationRegistry.getInstrumentation().getUiAutomation().getRootInActiveWindow();
@@ -73,7 +75,8 @@ public class HomeRemoteTest {
         key(KeyEvent.KEYCODE_BACK); SystemClock.sleep(250);
         key(KeyEvent.KEYCODE_DPAD_LEFT); key(KeyEvent.KEYCODE_DPAD_LEFT); assertFocus("tvNavSettings");
         key(KeyEvent.KEYCODE_DPAD_CENTER); SystemClock.sleep(300);
-        assertFalse("Settings remain available", root().findAccessibilityNodeInfosByText("配置地址").isEmpty());
+        assertFocus("tvSettingsGroup0");
+        assertNotNull("Settings remain available", findNode(root(), "com.coke.tv:id/llApi"));
         key(KeyEvent.KEYCODE_BACK); SystemClock.sleep(200);
         InstrumentationRegistry.getInstrumentation().runOnMainSync(activity::finish);
     }

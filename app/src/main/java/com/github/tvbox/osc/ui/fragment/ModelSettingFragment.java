@@ -10,8 +10,8 @@ import android.provider.DocumentsContract;
 import android.provider.OpenableColumns;
 import android.os.Handler;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import com.github.tvbox.osc.ui.compose.TvSettingValue;
+import com.github.tvbox.osc.ui.compose.TvSettingsView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -38,7 +38,6 @@ import com.github.tvbox.osc.ui.dialog.SearchRemoteTvDialog;
 import com.github.tvbox.osc.ui.dialog.SelectDialog;
 import com.github.tvbox.osc.ui.dialog.XWalkInitDialog;
 import com.github.tvbox.osc.util.DanmuHelper;
-import com.github.tvbox.osc.util.FastClickCheckUtil;
 import com.github.tvbox.osc.util.FileUtils;
 import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.HistoryHelper;
@@ -74,34 +73,32 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
  */
 public class ModelSettingFragment extends BaseLazyFragment {
     private static final int REQUEST_LOCAL_CONFIG = 1001;
-    private TextView tvDebugOpen;
-    private TextView tvMediaCodec;
-    private TextView tvParseWebView;
-    private TextView tvPlay;
-    private TextView tvRender;
-    private TextView tvScale;
-    private TextView tvApi;
-    private TextView tvApiLine;
-    private View llApi;
-    private View llApiHistory;
-    private View llApiLine;
-    private TextView tvHomeApi;
-    private TextView tvDns;
-    private TextView tvHomeRec;
-    private TextView tvHistoryNum;
-    private TextView tvHistoryMerge;
-    private TextView tvSearchView;
-    private TextView tvShowPreviewText;
-    private TextView tvFastSearchText;
-    private TextView tvm3u8AdText;
-    private TextView tvAutoSwitchLineText;
-    private TextView tvRecStyleText;
-    private TextView tvIjkCachePlay;
-    private TextView tvHomeDefaultShow;
+    private TvSettingValue tvDebugOpen;
+    private TvSettingValue tvMediaCodec;
+    private TvSettingValue tvParseWebView;
+    private TvSettingValue tvPlay;
+    private TvSettingValue tvRender;
+    private TvSettingValue tvScale;
+    private TvSettingValue tvApi;
+    private TvSettingValue tvApiLine;
+    private TvSettingsView settings;
+    private TvSettingValue tvHomeApi;
+    private TvSettingValue tvDns;
+    private TvSettingValue tvHomeRec;
+    private TvSettingValue tvHistoryNum;
+    private TvSettingValue tvHistoryMerge;
+    private TvSettingValue tvSearchView;
+    private TvSettingValue tvShowPreviewText;
+    private TvSettingValue tvFastSearchText;
+    private TvSettingValue tvm3u8AdText;
+    private TvSettingValue tvAutoSwitchLineText;
+    private TvSettingValue tvRecStyleText;
+    private TvSettingValue tvIjkCachePlay;
+    private TvSettingValue tvHomeDefaultShow;
     private ApiDialog apiDialog;
     private boolean selectLocalLive;
-    private TextView tvDanmuOpenText;
-    private TextView tvDanmuApiText;
+    private TvSettingValue tvDanmuOpenText;
+    private TvSettingValue tvDanmuApiText;
 
     public static ModelSettingFragment newInstance() {
         return new ModelSettingFragment().setArguments();
@@ -113,43 +110,41 @@ public class ModelSettingFragment extends BaseLazyFragment {
 
     @Override
     protected int getLayoutResID() {
-        return R.layout.fragment_model;
+        return R.layout.fragment_material_settings;
     }
 
     @Override
     protected void init() {
-        tvFastSearchText = findViewById(R.id.showFastSearchText);
+        settings = findViewById(R.id.tvSettingsRoot);
+        tvFastSearchText = settings.value(R.id.showFastSearchText);
         tvFastSearchText.setText(Hawk.get(HawkConfig.FAST_SEARCH_MODE, true) ? "开启" : "关闭");
-        tvm3u8AdText = findViewById(R.id.m3u8AdText);
+        tvm3u8AdText = settings.value(R.id.m3u8AdText);
         tvm3u8AdText.setText(Hawk.get(HawkConfig.M3U8_PURIFY, false) ? "开启" : "关闭");
-        tvDanmuOpenText = findViewById(R.id.danmuOpenText);
+        tvDanmuOpenText = settings.value(R.id.danmuOpenText);
         tvDanmuOpenText.setText(DanmuHelper.isOpen() ? "开启" : "关闭");
-        tvDanmuApiText = findViewById(R.id.danmuApiText);
+        tvDanmuApiText = settings.value(R.id.danmuApiText);
         refreshDanmuApiText();
-        tvAutoSwitchLineText = findViewById(R.id.autoSwitchLineText);
+        tvAutoSwitchLineText = settings.value(R.id.autoSwitchLineText);
         tvAutoSwitchLineText.setText(Hawk.get(HawkConfig.AUTO_SWITCH_LINE, true) ? "开启" : "关闭");
-        tvRecStyleText = findViewById(R.id.showRecStyleText);
+        tvRecStyleText = settings.value(R.id.showRecStyleText);
         tvRecStyleText.setText(Hawk.get(HawkConfig.HOME_REC_STYLE, false) ? "是" : "否");
-        tvShowPreviewText = findViewById(R.id.showPreviewText);
+        tvShowPreviewText = settings.value(R.id.showPreviewText);
         tvShowPreviewText.setText(Hawk.get(HawkConfig.SHOW_PREVIEW, true) ? "开启" : "关闭");
-        tvDebugOpen = findViewById(R.id.tvDebugOpen);
-        tvParseWebView = findViewById(R.id.tvParseWebView);
-        tvMediaCodec = findViewById(R.id.tvMediaCodec);
-        tvPlay = findViewById(R.id.tvPlay);
-        tvRender = findViewById(R.id.tvRenderType);
-        tvScale = findViewById(R.id.tvScaleType);
-        llApi = findViewById(R.id.llApi);
-        llApiHistory = findViewById(R.id.llApiHistory);
-        llApiLine = findViewById(R.id.llApiLine);
-        tvApi = findViewById(R.id.tvApi);
-        tvApiLine = findViewById(R.id.tvApiLine);
-        tvHomeApi = findViewById(R.id.tvHomeApi);
-        tvDns = findViewById(R.id.tvDns);
-        tvHomeRec = findViewById(R.id.tvHomeRec);
-        tvHistoryNum = findViewById(R.id.tvHistoryNum);
-        tvHistoryMerge = findViewById(R.id.tvHistoryMerge);
-        tvSearchView = findViewById(R.id.tvSearchView);
-        tvIjkCachePlay = findViewById(R.id.tvIjkCachePlay);
+        tvDebugOpen = settings.value(R.id.tvDebugOpen);
+        tvParseWebView = settings.value(R.id.tvParseWebView);
+        tvMediaCodec = settings.value(R.id.tvMediaCodec);
+        tvPlay = settings.value(R.id.tvPlay);
+        tvRender = settings.value(R.id.tvRenderType);
+        tvScale = settings.value(R.id.tvScaleType);
+        tvApi = settings.value(R.id.tvApi);
+        tvApiLine = settings.value(R.id.tvApiLine);
+        tvHomeApi = settings.value(R.id.tvHomeApi);
+        tvDns = settings.value(R.id.tvDns);
+        tvHomeRec = settings.value(R.id.tvHomeRec);
+        tvHistoryNum = settings.value(R.id.tvHistoryNum);
+        tvHistoryMerge = settings.value(R.id.tvHistoryMerge);
+        tvSearchView = settings.value(R.id.tvSearchView);
+        tvIjkCachePlay = settings.value(R.id.tvIjkCachePlay);
         tvMediaCodec.setText(Hawk.get(HawkConfig.IJK_CODEC, "硬解码"));
         tvDebugOpen.setText(Hawk.get(HawkConfig.DEBUG_OPEN, false) ? "已打开" : "已关闭");
         tvParseWebView.setText(Hawk.get(HawkConfig.PARSE_WEBVIEW, true) ? "系统自带" : "XWalkView");
@@ -166,20 +161,18 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvPlay.setText(PlayerHelper.getPlayerName(Hawk.get(HawkConfig.PLAY_TYPE, 2)));
         tvRender.setText(PlayerHelper.getRenderName(Hawk.get(HawkConfig.PLAY_RENDER, 0)));
         tvIjkCachePlay.setText(Hawk.get(HawkConfig.IJK_CACHE_PLAY, false) ? "开启" : "关闭");
-        tvHomeDefaultShow = findViewById(R.id.tvHomeText);
+        tvHomeDefaultShow = settings.value(R.id.tvHomeText);
         tvHomeDefaultShow.setText(Hawk.get(HawkConfig.DEFAULT_LOAD_LIVE, false) ? "直播" : "点播");
-        findViewById(R.id.llDebug).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llDebug, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 Hawk.put(HawkConfig.DEBUG_OPEN, !Hawk.get(HawkConfig.DEBUG_OPEN, false));
                 tvDebugOpen.setText(Hawk.get(HawkConfig.DEBUG_OPEN, false) ? "已打开" : "已关闭");
             }
         });
-        findViewById(R.id.llParseWebVew).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llParseWebVew, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 boolean useSystem = !Hawk.get(HawkConfig.PARSE_WEBVIEW, true);
                 Hawk.put(HawkConfig.PARSE_WEBVIEW, useSystem);
                 tvParseWebView.setText(Hawk.get(HawkConfig.PARSE_WEBVIEW, true) ? "系统自带" : "XWalkView");
@@ -195,26 +188,23 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 }
             }
         });
-        findViewById(R.id.llBackup).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llBackup, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 BackupDialog dialog = new BackupDialog(mActivity);
                 dialog.show();
             }
         });
-        findViewById(R.id.llAbout).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llAbout, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 AboutDialog dialog = new AboutDialog(mActivity);
                 dialog.show();
             }
         });
-        findViewById(R.id.llWp).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llWp, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 if (!ApiConfig.get().wallpaper.isEmpty())
                     OkGo.<File>get(ApiConfig.get().wallpaper).execute(new FileCallback(requireActivity().getFilesDir().getAbsolutePath(), "wp") {
                         @Override
@@ -234,20 +224,18 @@ public class ModelSettingFragment extends BaseLazyFragment {
                     });
             }
         });
-        findViewById(R.id.llWpRecovery).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llWpRecovery, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 File wp = new File(requireActivity().getFilesDir().getAbsolutePath() + "/wp");
                 if (wp.exists())
                     wp.delete();
                 ((BaseActivity) requireActivity()).changeWallpaper(true);
             }
         });
-        findViewById(R.id.llHomeApi).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llHomeApi, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 List<SourceBean> sites = ApiConfig.get().getSwitchSourceBeanList();
                 if (sites.size() > 0) {
                     SelectDialog<SourceBean> dialog = new SelectDialog<>(mActivity);
@@ -282,10 +270,9 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 }
             }
         });
-        findViewById(R.id.llDns).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llDns, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 int dohUrl = Hawk.get(HawkConfig.DOH_URL, 0);
 
                 SelectDialog<String> dialog = new SelectDialog<>(mActivity);
@@ -319,10 +306,9 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 dialog.show();
             }
         });
-        findViewById(R.id.llApi).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llApi, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 apiDialog = new ApiDialog(mActivity);
                 ApiDialog dialog = apiDialog;
                 EventBus.getDefault().register(dialog);
@@ -358,9 +344,9 @@ public class ModelSettingFragment extends BaseLazyFragment {
             }
         });
 
-        findViewById(R.id.llApiHistory).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llApiHistory, new Runnable() {
             @Override
-            public void onClick(View v) {
+            public void run() {
                 ArrayList<String> history = Hawk.get(HawkConfig.API_HISTORY, new ArrayList<String>());
                 if (history.isEmpty())
                     return;
@@ -397,9 +383,9 @@ public class ModelSettingFragment extends BaseLazyFragment {
             }
         });
 
-        findViewById(R.id.llApiLine).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llApiLine, new Runnable() {
             @Override
-            public void onClick(View v) {
+            public void run() {
                 ArrayList<String> apiLines = Hawk.get(HawkConfig.API_LINE_LIST, new ArrayList<String>());
                 if (apiLines.isEmpty()) {
                     Toast.makeText(mContext, "线路列表为空", Toast.LENGTH_SHORT).show();
@@ -444,13 +430,12 @@ public class ModelSettingFragment extends BaseLazyFragment {
         });
 
 
-        findViewById(R.id.llMediaCodec).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llMediaCodec, new Runnable() {
             @Override
-            public void onClick(View v) {
+            public void run() {
                 List<IJKCode> ijkCodes = ApiConfig.get().getIjkCodes();
                 if (ijkCodes == null || ijkCodes.size() == 0)
                     return;
-                FastClickCheckUtil.check(v);
 
                 int defaultPos = 0;
                 String ijkSel = Hawk.get(HawkConfig.IJK_CODEC, "硬解码");
@@ -488,10 +473,9 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 dialog.show();
             }
         });
-        findViewById(R.id.llScale).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llScale, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 int defaultPos = Hawk.get(HawkConfig.PLAY_SCALE, 0);
                 ArrayList<Integer> players = new ArrayList<>();
                 players.add(0);
@@ -527,10 +511,9 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 dialog.show();
             }
         });
-        findViewById(R.id.llPlay).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llPlay, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 int playerType = Hawk.get(HawkConfig.PLAY_TYPE, 2);
                 int defaultPos = 0;
                 ArrayList<Integer> players = PlayerHelper.getExistPlayerTypes();
@@ -571,10 +554,9 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 dialog.show();
             }
         });
-        findViewById(R.id.llRender).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llRender, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 int defaultPos = Hawk.get(HawkConfig.PLAY_RENDER, 0);
                 ArrayList<Integer> renders = new ArrayList<>();
                 renders.add(0);
@@ -607,10 +589,9 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 dialog.show();
             }
         });
-        findViewById(R.id.llHomeRec).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llHomeRec, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 int defaultPos = Hawk.get(HawkConfig.HOME_REC, HawkConfig.DEFAULT_HOME_REC);
                 ArrayList<Integer> types = new ArrayList<>();
                 types.add(0);
@@ -643,10 +624,9 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 dialog.show();
             }
         });
-        findViewById(R.id.llSearchView).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llSearchView, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 int defaultPos = Hawk.get(HawkConfig.SEARCH_VIEW, 0);
                 ArrayList<Integer> types = new ArrayList<>();
                 types.add(0);
@@ -681,22 +661,20 @@ public class ModelSettingFragment extends BaseLazyFragment {
         SettingActivity.callback = new SettingActivity.DevModeCallback() {
             @Override
             public void onChange() {
-                findViewById(R.id.llDebug).setVisibility(View.VISIBLE);
+                settings.showAction(R.id.llDebug, true);
             }
         };
 
-        findViewById(R.id.showPreview).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.showPreview, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 Hawk.put(HawkConfig.SHOW_PREVIEW, !Hawk.get(HawkConfig.SHOW_PREVIEW, true));
                 tvShowPreviewText.setText(Hawk.get(HawkConfig.SHOW_PREVIEW, true) ? "开启" : "关闭");
             }
         });
-        findViewById(R.id.llHistoryNum).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llHistoryNum, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 int defaultPos = Hawk.get(HawkConfig.HISTORY_NUM, 0);
                 ArrayList<Integer> types = new ArrayList<>();
                 types.add(0);
@@ -729,37 +707,33 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 dialog.show();
             }
         });
-        findViewById(R.id.showFastSearch).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.showFastSearch, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 Hawk.put(HawkConfig.FAST_SEARCH_MODE, !Hawk.get(HawkConfig.FAST_SEARCH_MODE, true));
                 tvFastSearchText.setText(Hawk.get(HawkConfig.FAST_SEARCH_MODE, true) ? "开启" : "关闭");
             }
         });
-        findViewById(R.id.m3u8Ad).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.m3u8Ad, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 boolean is_purify=Hawk.get(HawkConfig.M3U8_PURIFY, false);
                 Hawk.put(HawkConfig.M3U8_PURIFY, !is_purify);
                 tvm3u8AdText.setText(!is_purify ? "开启" : "关闭");
             }
         });
-        findViewById(R.id.danmuOpen).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.danmuOpen, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 boolean open = !DanmuHelper.isOpen();
                 DanmuHelper.setOpen(open);
                 tvDanmuOpenText.setText(open ? "开启" : "关闭");
                 EventBus.getDefault().post(new RefreshEvent(RefreshEvent.TYPE_SET_DANMU_SETTINGS, open));
             }
         });
-        findViewById(R.id.danmuApi).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.danmuApi, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 DanmuApiDialog dialog = new DanmuApiDialog(mActivity);
                 dialog.setOnListener(new DanmuApiDialog.OnListener() {
                     @Override
@@ -770,28 +744,25 @@ public class ModelSettingFragment extends BaseLazyFragment {
                 dialog.show();
             }
         });
-        findViewById(R.id.autoSwitchLine).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.autoSwitchLine, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 boolean enable = !Hawk.get(HawkConfig.AUTO_SWITCH_LINE, true);
                 Hawk.put(HawkConfig.AUTO_SWITCH_LINE, enable);
                 tvAutoSwitchLineText.setText(enable ? "开启" : "关闭");
             }
         });
-        findViewById(R.id.llHomeRecStyle).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llHomeRecStyle, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 Hawk.put(HawkConfig.HOME_REC_STYLE, !Hawk.get(HawkConfig.HOME_REC_STYLE, false));
                 tvRecStyleText.setText(Hawk.get(HawkConfig.HOME_REC_STYLE, false) ? "是" : "否");
             }
         });
 
-        findViewById(R.id.llHistoryMerge).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.llHistoryMerge, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 boolean historyMerge = !Hawk.get(HawkConfig.HISTORY_MERGE, false);
                 Hawk.put(HawkConfig.HISTORY_MERGE, historyMerge);
                 tvHistoryMerge.setText(historyMerge ? "开启" : "关闭");
@@ -799,17 +770,16 @@ public class ModelSettingFragment extends BaseLazyFragment {
         });
 
         //下次进入
-        findViewById(R.id.tvHomeLive).setOnClickListener(new View.OnClickListener() {
+        settings.bindAction(R.id.tvHomeLive, new Runnable() {
             @Override
-            public void onClick(View v) {
-                FastClickCheckUtil.check(v);
+            public void run() {
                 Hawk.put(HawkConfig.DEFAULT_LOAD_LIVE, !Hawk.get(HawkConfig.DEFAULT_LOAD_LIVE, false));
                 tvHomeDefaultShow.setText(Hawk.get(HawkConfig.DEFAULT_LOAD_LIVE, false) ? "直播" : "点播");
             }
         });
 
-        findViewById(R.id.llIjkCachePlay).setOnClickListener((view -> onClickIjkCachePlay(view)));
-        findViewById(R.id.llClearCache).setOnClickListener((view -> onClickClearCache(view)));
+        settings.bindAction(R.id.llIjkCachePlay, this::onClickIjkCachePlay);
+        settings.bindAction(R.id.llClearCache, this::onClickClearCache);
     }
 
     private void restartAppAfterConfigChanged() {
@@ -851,10 +821,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
         ArrayList<String> apiLines = Hawk.get(HawkConfig.API_LINE_LIST, new ArrayList<String>());
         String current = Hawk.get(HawkConfig.API_URL, "");
         boolean showLine = HistoryHelper.isApiLineUrl(current);
-        if (llApiLine != null) {
-            llApiLine.setVisibility(showLine ? View.VISIBLE : View.GONE);
-        }
-        updateApiRowWeight(showLine);
+        settings.showAction(R.id.llApiLine, showLine);
         String lineName = "";
         if (showLine) {
             for (String apiLine : apiLines) {
@@ -882,20 +849,6 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvDanmuApiText.setText(config.isEmpty() ? "默认" : "接口");
     }
 
-    private void updateApiRowWeight(boolean showLine) {
-        if (llApi == null) return;
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) llApi.getLayoutParams();
-        params.weight = showLine ? 1.0f : 3.08f;
-        llApi.setLayoutParams(params);
-        if (llApiHistory != null) {
-            LinearLayout.LayoutParams historyParams = (LinearLayout.LayoutParams) llApiHistory.getLayoutParams();
-            int margin = showLine ? getResources().getDimensionPixelSize(R.dimen.vs_5) : 0;
-            historyParams.rightMargin = margin;
-            historyParams.setMarginEnd(margin);
-            llApiHistory.setLayoutParams(historyParams);
-        }
-    }
-
     private void restartApp() {
         if (mContext == null) return;
         Intent intent = mContext.getPackageManager().getLaunchIntentForPackage(mContext.getPackageName());
@@ -906,8 +859,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
         }
     }
 
-    private void onClickIjkCachePlay(View v) {
-        FastClickCheckUtil.check(v);
+    private void onClickIjkCachePlay() {
         Hawk.put(HawkConfig.IJK_CACHE_PLAY, !Hawk.get(HawkConfig.IJK_CACHE_PLAY, false));
         tvIjkCachePlay.setText(Hawk.get(HawkConfig.IJK_CACHE_PLAY, false) ? "开启" : "关闭");
     }
@@ -1057,8 +1009,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
         return name;
     }
 
-    private void onClickClearCache(View v) {
-        FastClickCheckUtil.check(v);
+    private void onClickClearCache() {
         String cachePath = FileUtils.getCachePath();
         File cacheDir = new File(cachePath);
         new Thread(() -> {
@@ -1089,6 +1040,10 @@ public class ModelSettingFragment extends BaseLazyFragment {
     public void onDestroyView() {
         super.onDestroyView();
         SettingActivity.callback = null;
+        if (settings != null) settings.releaseActions();
+        rootView = null;
+        mIsFirstVisible = true;
+        currentVisibleState = false;
     }
 
     String getHomeRecName(int type) {
