@@ -19,7 +19,11 @@ AI 接手入口：[AI_HANDOFF.md](docs/AI_HANDOFF.md)。用户仓库：[tardlk/T
 
 ## 现代化执行进度
 
-保持当前 UI，按 AVBox 式路线逐步迁移。P1 / P2 已通过；P3 首页核心已迁移 Compose，P4 历史、收藏及详情信息 / 收藏状态已接入 Kotlin，搜索和详情完整协调仍在推进。最新阶段包为 `artifacts/TV-0.2.1-dev-armv7-debug.apk` 与 `artifacts/TV-0.2.1-dev-arm64-debug.apk`；23 项单测、8 项 ARM64 TV 设备测试通过，复杂电视控件与播放器继续复用。性能、完整生命周期 / 状态矩阵与 ARMv7 真机验收仍未完成。详见 [执行记录](docs/MODERNIZATION.md) 与 [阶段方案](.scratch/tv-modernization/spec.md)。
+当前检查点为 **0.3.0-dev**（versionCode 5）：P1 / P2 已通过，P3 首页核心采用 Compose；P4 历史 / 收藏、详情信息与收藏状态、普通搜索状态已完成切片。首页与设置已统一 Material 3 for TV 主题，保留 C 首页和全部 29 个设置入口；复杂电视列表、搜索键盘、原播放器与遥控器逻辑继续复用。详见 [执行记录](docs/MODERNIZATION.md)、[阶段方案](.scratch/tv-modernization/spec.md)与 [Material UI 规格](.scratch/tv-material-ui/spec.md)。
+
+双 ABI Debug、34 项单元测试、13 项 ARM64 TV 设备测试及首页 / 设置四组尺寸与主题检查通过。本机包为 `artifacts/TV-0.3.0-dev-armv7-debug.apk` 与 `artifacts/TV-0.3.0-dev-arm64-debug.apk`；APK、截图和测试报告属于 ignored 本地材料，GitHub clone 后需按源码重建。
+
+下一技术切片是 P4 快速搜索状态迁移；词表生命周期、详情完整协调、设置完整状态迁移与直播接入继续待做。Material 样板待用户视觉审阅后逐页推广。性能、完整生命周期 / 状态矩阵、音频、真实外部线路与 ARMv7 真机验收仍未完成，当前检查点不代表所有阶段通过。
 
 ## 构建
 

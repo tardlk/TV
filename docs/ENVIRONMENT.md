@@ -105,3 +105,7 @@ platform-tools 37.0.1 的 adb server 在本机 macOS 出现 libunwind invalid co
 长期 `${HOME}/.local/share/tv-android/` 仍约 13 GiB，保留用途与前表相同；长期 AVD 约 998 MiB。ignored artifacts 合计约 1.2 GiB，包含本轮 0.3.0-dev 双 ABI Debug 包（ARMv7 约 79 MiB、ARM64 约 90 MiB）及约 8.2 MiB 的 material-ui 证据，用于用户审阅和版本回退；旧包与既有证据保留。ignored .local-test 约 76 KiB，保留用户地址及最终日志，不进入 Git / 正式 APK。
 
 本项目无仍在运行的服务。Rosetta 系统共享 oahd、已有 Android 工具和 Codex bundled Python 等其他项目可能共用的工具保持原状；AVBox 参考仓库只读，用户修改未触碰。本轮只做本地提交，没有推送或上传。
+
+## GitHub 接手同步（2026-10-13）
+
+用户授权整理并推送当前源码 / 文档到 tardlk/TV 的 main。本次复用已有 Git，只更新 README、AGENTS 与接手 / 环境文档，同步普通搜索和 Material 样板的已验证提交；未重建 APK、启动服务、安装工具或改动长期 AVD。APK、测试地址、签名材料和验证报告继续留在 ignored 本地目录。项目服务仍为零，长期环境和产物占用沿用上方最新记录。

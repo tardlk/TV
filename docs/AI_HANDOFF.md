@@ -1,14 +1,21 @@
 # AI 接手：TV
 
-更新日期：2026-10-13。应用实现检查点：`0.3.0-dev`（versionCode 5，Material 3 for TV 首页 / 设置样板；对应提交见 Git 记录）。这是一份交接快照，后续修改以当前代码、任务评论与 Git 记录为准。
+更新日期：2026-10-13。应用实现检查点：`0.3.0-dev`（versionCode 5），实现提交 `b35a9176`；普通搜索状态迁移提交 `760e788c`。本次交接同步这两组实现与接手文档到 `tardlk/TV` 的 `main`，应用代码不再改动。后续修改以当前代码、任务评论与 Git 记录为准。
 
 ## 开始工作
 
-1. 先读根目录 [AGENTS.md](../AGENTS.md)，再读[现代化方案](../.scratch/tv-modernization/spec.md)、[Material UI 规格与当前样板](../.scratch/tv-material-ui/spec.md)、[P4 当前任务](../.scratch/tv-modernization/issues/04-compose-vod-pages.md)和[执行记录](MODERNIZATION.md)。完成条件：能区分已运行代码、部分实现与后续计划，知道新视觉目标已覆盖旧逐像素要求。
+1. 先读根目录 [AGENTS.md](../AGENTS.md)与[现代化方案](../.scratch/tv-modernization/spec.md)，按下方“下一切片”读取当前任务。需要查历史验证时再读[执行记录](MODERNIZATION.md)。完成条件：能区分已运行代码、部分实现与后续计划，知道新视觉目标已覆盖旧逐像素要求。
 2. 检查 `git status --short --branch`、`git remote -v` 和已有工具；根据[环境记录](ENVIRONMENT.md)复用环境。完成条件：确认当前分支、用户修改、工具路径及服务状态，再开始改动。
-3. 用户要求继续技术迁移时，从 P4 的快速搜索状态迁移接着做；普通搜索状态切片已通过，先读[两页行为差异](../.scratch/tv-modernization/baseline/search.md)。若继续视觉改进，先看 [UI 任务 01](../.scratch/tv-material-ui/issues/01-theme-home-settings.md)与用户对首页 / 设置样板的反馈，再逐页推广主题。完成条件：交付有构建、必要测试与本地提交的切片，更新任务、执行记录与清理结果。
+3. 根据用户最新指令选择技术迁移或视觉改进；未指定新方向的“继续开发”默认从 P4 快速搜索状态迁移接着做。完成条件：交付有构建、必要测试与本地提交的切片，更新任务、执行记录与清理结果。
 
-用户已授权按现代化方案执行，无需重新询问路线或重新做需求访谈；新对话的最新指令决定当前动作。最近切片完成普通搜索的状态与请求迁移，仅本地提交；此前 GitHub 整理推送的授权不扩大到后续远程写入。
+用户已授权按现代化方案执行，无需重新询问路线或重新做需求访谈。2026-10-13 最新动作是整理交接并推送当前源码 / 文档；本次没有开始下一开发切片。
+
+## 下一切片
+
+- **技术迁移：P4 快速搜索。** 先读 [P4 任务](../.scratch/tv-modernization/issues/04-compose-vod-pages.md)与[两页行为差异](../.scratch/tv-modernization/baseline/search.md)，完整核对 FastSearchActivity 的分词、按源筛选、2 秒 pump / 3 秒 advance、状态栏、目录返回与详情候补。复用现有 SourceAccess 的独立 worker / 请求 tag；保留原键盘、列表和播放器，不直接套用普通搜索匹配规则。
+- **该切片的完成条件：** 快速搜索状态 / 调度迁移有对应测试；固定源验证筛选、分词、暂停恢复、目录 / 详情返回和 Activity 重建；普通搜索与原播放回归、双 ABI Debug / 包检查通过。更新 P4 任务和执行记录、清理临时环境后本地提交；剩余未覆盖项继续明确列出，不因此标记整个 P4 完成。
+- **视觉改进：** 先读 [Material UI 规格](../.scratch/tv-material-ui/spec.md)和 [UI 任务 01](../.scratch/tv-material-ui/issues/01-theme-home-settings.md)。首页 / 设置样板已实现且通过设备检查，尚未收到用户视觉反馈；用户要求继续 UI 时以其最新反馈逐页推广，保留现有操作闭环。
+- **后续阶段：** 词表生命周期、详情完整协调、进程死亡与完整错误 / 空态矩阵仍在 P4；设置完整状态迁移 / 直播、播放服务与 Media3 按 P5–P7 推进。不要将纯显示层样板当作设置状态或播放架构已经迁移。
 
 ## 当前进度
 
@@ -106,6 +113,6 @@ python3 scripts/verify-apk.py app/build/outputs/apk/python32/debug/TV_debug-pyth
 
 用户仓库：<https://github.com/tardlk/TV>，目标分支 `main`；本地开发分支 `tv/initial-ui` 跟踪 `origin/main`。`origin` 指向用户仓库，`upstream` 指向只读 TVBoxOS；新 clone 默认只有 origin，如需研究上游再按 UPSTREAM.md 添加。
 
-保留上游 Git 历史、许可证与[来源记录](UPSTREAM.md)。项目提交依次为：`a2f5494` 首包、`d1cf993` 模拟器、`854ce3b` 方案、`922e381` P1、`59bb28d` P2、`01bc5cc` P3、`194dd9d` 历史 / 收藏、`f8bb716` 详情切片；交接整理提交可用 `git log` 查询。
+保留上游 Git 历史、许可证与[来源记录](UPSTREAM.md)。最近实现为 `760e788c` 普通搜索状态、`b35a9176` Material 首页 / 设置样板；更早阶段与本次交接提交可用 `git log` 查询。
 
-此前用户明确授权整理并推送 tardlk/TV。后续普通搜索与 Material 样板按方案执行 Debug 构建和本地提交，没有推送；后续远程写入按当次用户授权处理。Release 构建、GitHub Release、APK 上传、自动发布及对其他仓库的写入没有随此前源码推送获得授权。
+用户于 2026-10-13 明确授权整理接手文档并推送当前源码 / 文档到 `origin` 的 `main`；本次范围包含普通搜索迁移、Material 样板及交接整理，保留完整历史，通过普通快进推送同步。后续远程写入按当次用户授权处理；Release、GitHub Release、APK 上传、自动发布及对参考仓库的写入仍未授权。
